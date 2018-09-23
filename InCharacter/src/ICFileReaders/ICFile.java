@@ -1,7 +1,7 @@
 package ICFileReaders;
 
 public class ICFile {
-    private Object data;
+    private Attribute data;
     private String path;
     private String name;
     private String ictype;
@@ -17,4 +17,6 @@ public class ICFile {
     public void setICType(String filetype) {
         ictype = filetype;
     }
+
+
 }
