@@ -9,7 +9,8 @@ public class InCharacterMain {
         inst.Launch();
 
         ICFileParser parser = new ICFileParser();
-        parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Config\\Rule Sets\\WadeRules\\Base.txt");
+        ICFile icfile = parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Config\\Rule Sets\\WadeRules\\Base.txt");
+        icfile.print();
     }
 
 }
