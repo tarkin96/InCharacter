@@ -12,3 +12,5 @@ Attributes =
 	Wisdom = 0;
 	Charisma = 0;
 ;
+
+Health = Constitution * 5;

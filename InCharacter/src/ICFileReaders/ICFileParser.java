@@ -29,14 +29,19 @@ public class ICFileParser {
                     //check if line has no sub attrs
                     else if (line.substring(line.length() - 1).equals(";")) {
                         //check if line has a value
-                        if (isNumeric(line.substring(line.lastIndexOf("=") + 1, line.length() - 1))) {
+                        if (isNumeric(line.substring(line.indexOf("=") + 1, line.length() - 1))) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addtoICFile(icfile, nameOfAttr, Integer.parseInt(line.substring(line.lastIndexOf("=") + 1, line.length() - 1)));
+                            addValueToICFile(icfile, nameOfAttr, Integer.parseInt(line.substring(line.lastIndexOf("=") + 1, line.length() - 1)));
                         }
                         // check if line has a description
                         else if(line.substring(line.lastIndexOf("=") + 1).contains("\"")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addtoICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
+                            addDescToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
+                        }
+                        //check if line has an equation
+                        else if(!line.equals(";")) {
+                            String nameOfAttr = line.substring(0, line.lastIndexOf("="));
+                            addDescToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
                         }
                         else {System.out.println("something is wrong");}
 
@@ -44,7 +49,7 @@ public class ICFileParser {
                     //if line has sub attributes
                     else if (line.substring(line.length() - 1).equals("=")){
                         String nameOfAttr = line.substring(0, line.length() - 1);
-                        addtoICFile(icfile, nameOfAttr);
+                        addSubAttrToICFile(icfile, nameOfAttr);
                         //System.out.println("added stuff");
                     }
                     else {System.out.println("Could not read line properly.");}
@@ -59,19 +64,24 @@ public class ICFileParser {
     }
 
     //method to add a sub attribute
-    public void addtoICFile(ICFile file, String name) {
-        file.addData(name);
+    public void addSubAttrToICFile(ICFile file, String name) {
+        file.addSubAttr(name);
     }
 
     //method to add a value
-    public void addtoICFile(ICFile file, String name, int value) {
-        file.addData(name, value);
+    public void addValueToICFile(ICFile file, String name, int value) {
+        file.addVal(name, value);
         //System.out.println("added stuff");
     }
 
     //method to add a decription
-    public void addtoICFile(ICFile file, String name, String desc) {
-        file.addData(name, desc);
+    public void addDescToICFile(ICFile file, String name, String desc) {
+        file.addDesc(name, desc);
+        //System.out.println("added stuff");
+    }
+
+    public void addEqToICFile(ICFile file, String name, String eq) {
+        file.addEq(name, eq);
         //System.out.println("added stuff");
     }
 

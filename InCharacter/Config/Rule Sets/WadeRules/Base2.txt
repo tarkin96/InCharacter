@@ -1,0 +1,17 @@
+Nickname = "";
+
+Age = 0;
+
+Race = "";
+
+Attributes =
+	Stength =
+		Dexterity =  
+			Constitution = 0;
+		;
+	;
+	Intelligence = 
+		Wisdom = 0;
+		Charisma = 0;
+	;
+;

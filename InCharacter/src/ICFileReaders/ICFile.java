@@ -27,7 +27,7 @@ public class ICFile {
     }
 
     //add a sub attribute
-    public void addData(String name) {
+    public void addSubAttr(String name) {
         Attribute newAttr = new Attribute(name);
         data.addSubAttr(newAttr);
         newAttr.setParentAttr(data);
@@ -35,13 +35,18 @@ public class ICFile {
     }
 
     //add a value
-    public void addData(String name, Integer val) {
+    public void addVal(String name, Integer val) {
         data.addValue(name, val);
     }
 
     //add a description
-    public void addData(String name, String desc) {
+    public void addDesc(String name, String desc) {
         data.addDescription(name, desc);
+    }
+
+    //add an equation
+    public void addEq(String name, String eq) {
+        data.addEquation(name, eq);
     }
 
     //sets current Attribute to the parent attribute

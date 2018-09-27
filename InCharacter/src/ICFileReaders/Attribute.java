@@ -7,6 +7,7 @@ public class Attribute {
     private ArrayList<Attribute> subAttrs;
     private Map<String, Pair<Integer, String>> descriptions;
     private Map<String, Pair<Integer, Integer>> values;
+    private Map<String, Pair<Integer, String>> equations;
     private Attribute parentAttr;
     private String name;
     private int itemNumber;
@@ -14,6 +15,7 @@ public class Attribute {
     public Attribute(String text) {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
+        equations = new LinkedHashMap<String, Pair<Integer, String>>();
         values = new LinkedHashMap<String, Pair<Integer, Integer>>();
         name = text;
         itemNumber = 0;
@@ -32,6 +34,16 @@ public class Attribute {
         }
         else { System.out.println("This description already exists");}
     }
+
+    public void addEquation(String identifier, String eq) {
+        if (!equations.containsKey(identifier)) {
+            itemNumber++;
+            equations.put(identifier, new Pair<Integer, String>(itemNumber, eq));
+            //System.out.println(identifier + " = " + desc);
+        }
+        else { System.out.println("This description already exists");}
+    }
+
     public void addValue(String identifier, Integer val) {
         if (!values.containsKey(identifier)) {
             itemNumber++;
@@ -51,8 +63,16 @@ public class Attribute {
 
 
 
+
+
+
+
+
+
+
+
     public void print() {
-        int count = 1, subCount=0, valCount = 0, descCount = 0;
+        int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
 
         Iterator<Map.Entry<String, Pair<Integer, Integer>>> valit = values.entrySet().iterator();
         Map.Entry<String, Pair<Integer, Integer>> value = null;
@@ -66,6 +86,12 @@ public class Attribute {
             desc = descit.next();
         }
 
+        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = equations.entrySet().iterator();
+        Map.Entry<String, Pair<Integer, String>> eq = null;
+        if (equations.size() != 0) {
+            eq = eqit.next();
+        }
+
         //System.out.println(subAttrs.size());
         //System.out.println(values.size());
         //System.out.println(descriptions.size());
@@ -74,7 +100,7 @@ public class Attribute {
                 //System.out.println("found val");
                 count++;
                 valCount++;
-                System.out.println(value.getKey() + " = " + value.getValue().getValue());
+                System.out.println(value.getKey() + " = " + value.getValue().getValue() + ";");
                 if (valit.hasNext()) {
                     value = valit.next();
                 }
@@ -84,11 +110,20 @@ public class Attribute {
                 //System.out.println("found desc");
                 count++;
                 descCount++;
-                System.out.println(desc.getKey() + " = " + desc.getValue().getValue());
+                System.out.println(desc.getKey() + " = " + desc.getValue().getValue() + ";");
                 if (descit.hasNext()) {
                     desc = descit.next();
                 }
 
+            }
+            else if (equations.size() != 0 && eq.getValue().getKey() == count) {
+                //System.out.println("found desc");
+                count++;
+                eqCount++;
+                System.out.println(eq.getKey() + " = " + eq.getValue().getValue() + ";");
+                if (eqit.hasNext()) {
+                    eq = eqit.next();
+                }
 
             }
             else if (subAttrs.size() != 0 && subAttrs.size() > subCount) {
