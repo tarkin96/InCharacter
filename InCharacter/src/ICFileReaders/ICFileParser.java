@@ -46,7 +46,7 @@ public class ICFileParser {
                         //check if line has an equation
                         else if(!line.equals(";")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addDescToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
+                            addEqToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
                         }
                         else {System.out.println("something is wrong");}
 
