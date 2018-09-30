@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ICFileParser {
+    //creates an ICFile from a file path
     public ICFile parse(String file_path) {
 
         ICFile icfile = new ICFile();
@@ -22,6 +23,10 @@ public class ICFileParser {
             while (scan.hasNextLine()) {
                 String line = scan.nextLine().replaceAll("\\s","");
                 if (!line.equals("")) {
+                    /*
+                    IMPORTANT!!!!!
+                    THIS IS HOW THE FILE ENDS UP POINTING TO THE TOP OF THE ATTRIBUTE STRUCTURE!!!!
+                     */
                     //check if line isj ust a semicolon
                     if(line.equals(";")) {
                         icfile.setParentAsData();
@@ -63,13 +68,31 @@ public class ICFileParser {
         return icfile;
     }
 
+    //finds data in ICFile
+    public Float findVal(ICFile icfile, String name) {
+        return 1.0f;
+    }
+    public String findEquation(ICFile icfile, String name) {
+        return "";
+    }
+    public String findDescription(ICFile icfile, String name) {
+        return "";
+    }
+    public Attribute findAttribute(ICFile icfile, String name) {
+        return new Attribute("");
+    }
+    public Object findData(ICFile icfile, String name) {
+        return new Object();
+    }
+
+
     //method to add a sub attribute
     public void addSubAttrToICFile(ICFile file, String name) {
         file.addSubAttr(name);
     }
 
     //method to add a value
-    public void addValueToICFile(ICFile file, String name, int value) {
+    public void addValueToICFile(ICFile file, String name, float value) {
         file.addVal(name, value);
         //System.out.println("added stuff");
     }

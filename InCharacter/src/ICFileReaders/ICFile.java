@@ -26,6 +26,10 @@ public class ICFile {
         ictype = filetype;
     }
 
+    public Attribute getData() {
+        return data;
+    }
+
     //add a sub attribute
     public void addSubAttr(String name) {
         Attribute newAttr = new Attribute(name);
@@ -35,7 +39,7 @@ public class ICFile {
     }
 
     //add a value
-    public void addVal(String name, Integer val) {
+    public void addVal(String name, Float val) {
         data.addValue(name, val);
     }
 

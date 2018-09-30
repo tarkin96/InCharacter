@@ -6,7 +6,7 @@ import java.util.*;
 public class Attribute {
     private ArrayList<Attribute> subAttrs;
     private Map<String, Pair<Integer, String>> descriptions;
-    private Map<String, Pair<Integer, Integer>> values;
+    private Map<String, Pair<Integer, Float>> values;
     private Map<String, Pair<Integer, String>> equations;
     private Attribute parentAttr;
     private String name;
@@ -16,9 +16,80 @@ public class Attribute {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
         equations = new LinkedHashMap<String, Pair<Integer, String>>();
-        values = new LinkedHashMap<String, Pair<Integer, Integer>>();
+        values = new LinkedHashMap<String, Pair<Integer, Float>>();
         name = text;
         itemNumber = 0;
+    }
+
+
+    //perform deep copy of attribute
+    protected Attribute(Attribute other) {
+        descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
+        equations = new LinkedHashMap<String, Pair<Integer, String>>();
+        values = new LinkedHashMap<String, Pair<Integer, Float>>();
+        subAttrs = new ArrayList<Attribute>();
+        name = other.getName();
+
+        int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
+
+        Iterator<Map.Entry<String, Pair<Integer, Float>>> valit = other.getValues().entrySet().iterator();
+        Map.Entry<String, Pair<Integer, Float>> value = null;
+        if (other.getValues().size() != 0) {
+            value = valit.next();
+        }
+
+        Iterator<Map.Entry<String, Pair<Integer, String>>> descit = other.getDescriptions().entrySet().iterator();
+        Map.Entry<String, Pair<Integer, String>> desc = null;
+        if (other.getDescriptions().size() != 0) {
+            desc = descit.next();
+        }
+
+        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = other.getEquations().entrySet().iterator();
+        Map.Entry<String, Pair<Integer, String>> eq = null;
+        if (other.getEquations().size() != 0) {
+            eq = eqit.next();
+        }
+
+        while (count <= other.getValues().size() + other.getDescriptions().size() + other.getSubAttrs().size()) {
+            if (other.getValues().size() != 0 && value.getValue().getKey() == count) {
+                count++;
+                valCount++;
+                //copy value element
+                addValue(value.getKey(), value.getValue().getValue());
+                if (valit.hasNext()) {
+                    value = valit.next();
+                }
+
+            }
+            else if (other.getDescriptions().size() != 0 && desc.getValue().getKey() == count) {
+                count++;
+                descCount++;
+                //copy description element
+                addDescription(desc.getKey(), desc.getValue().getValue());
+                if (descit.hasNext()) {
+                    desc = descit.next();
+                }
+
+            }
+            else if (other.getEquations().size() != 0 && eq.getValue().getKey() == count) {
+                count++;
+                eqCount++;
+                //copy equation element
+                addEquation(eq.getKey(), eq.getValue().getValue());
+                if (eqit.hasNext()) {
+                    eq = eqit.next();
+                }
+
+            }
+            else if (other.getSubAttrs().size() != 0 && other.getSubAttrs().size() > subCount) {
+                //copy subattr element
+                addSubAttr(other.getSubAttrs().get(subCount).copy());
+                count++;
+                subCount++;
+
+            }
+            else {System.out.println("Something bad happened!"); count++;}
+        }
     }
 
     public void addSubAttr(Attribute attr) {
@@ -26,6 +97,7 @@ public class Attribute {
         subAttrs.add(attr);
         //System.out.println(attr.name);
     }
+
     public void addDescription(String identifier, String desc) {
         if (!descriptions.containsKey(identifier)) {
             itemNumber++;
@@ -44,10 +116,10 @@ public class Attribute {
         else { System.out.println("This description already exists");}
     }
 
-    public void addValue(String identifier, Integer val) {
+    public void addValue(String identifier, Float val) {
         if (!values.containsKey(identifier)) {
             itemNumber++;
-            values.put(identifier, new Pair<Integer, Integer>(itemNumber, val));
+            values.put(identifier, new Pair<Integer, Float>(itemNumber, val));
             //System.out.println(identifier + " = " + val.toString());
         }
         else { System.out.println("This value already exists");}
@@ -61,21 +133,42 @@ public class Attribute {
         return parentAttr;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public List<Attribute> getSubAttrs() {
+        return subAttrs;
+    }
+
+    public Map<String, Pair<Integer, String>> getDescriptions() {
+        return descriptions;
+    }
+
+    public Map<String, Pair<Integer, String>> getEquations() {
+        return equations;
+    }
+
+    public Map<String, Pair<Integer, Float>> getValues() {
+        return values;
+    }
 
 
+    //start a deep copy for attribute
+    public Attribute copy() {
 
-
-
-
+        return new Attribute(this);
+    }
 
 
 
 
     public void print() {
+
         int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
 
-        Iterator<Map.Entry<String, Pair<Integer, Integer>>> valit = values.entrySet().iterator();
-        Map.Entry<String, Pair<Integer, Integer>> value = null;
+        Iterator<Map.Entry<String, Pair<Integer, Float>>> valit = values.entrySet().iterator();
+        Map.Entry<String, Pair<Integer, Float>> value = null;
         if (values.size() != 0) {
             value = valit.next();
         }
@@ -92,10 +185,8 @@ public class Attribute {
             eq = eqit.next();
         }
 
-        //System.out.println(subAttrs.size());
-        //System.out.println(values.size());
-        //System.out.println(descriptions.size());
         while (count <= values.size() + descriptions.size() + subAttrs.size()) {
+            //System.out.println("Size: " + values.size() + " itemnum = " + desc.getValue().getKey() + " count = " + count);
             if (values.size() != 0 && value.getValue().getKey() == count) {
                 //System.out.println("found val");
                 count++;

@@ -10,7 +10,14 @@ public class InCharacterMain {
 
         ICFileParser parser = new ICFileParser();
         ICFile icfile = parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Config\\Rule Sets\\WadeRules\\Base.txt");
-        icfile.print();
+        //icfile.print();
+
+
+
+        CharacterGen charGen = new CharacterGen();
+        charGen.genCharacter(icfile);
+
+        //icfile.print();
     }
 
 }
