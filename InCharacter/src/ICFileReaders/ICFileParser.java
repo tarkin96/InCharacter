@@ -69,21 +69,10 @@ public class ICFileParser {
     }
 
     //finds data in ICFile
-    public Float findVal(ICFile icfile, String name) {
+    public Float findVal(Attribute icfile, String name) {
         return 1.0f;
     }
-    public String findEquation(ICFile icfile, String name) {
-        return "";
-    }
-    public String findDescription(ICFile icfile, String name) {
-        return "";
-    }
-    public Attribute findAttribute(ICFile icfile, String name) {
-        return new Attribute("");
-    }
-    public Object findData(ICFile icfile, String name) {
-        return new Object();
-    }
+
 
 
     //method to add a sub attribute
@@ -110,5 +99,24 @@ public class ICFileParser {
 
     private boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
+
+
+
+
+    // these methods are used to find objects in an attribute
+
+    public String findEquation(Attribute icfile, String name) {
+        return "";
+    }
+    public String findDescription(Attribute icfile, String name) {
+        return "";
+    }
+    public Attribute findAttribute(Attribute icfile, String name) {
+        return new Attribute("");
+    }
+    public Object findData(Attribute icfile, String name) {
+        return new Object();
     }
 }

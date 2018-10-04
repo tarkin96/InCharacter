@@ -1,6 +1,7 @@
 package Main;
 
 import ICFileReaders.*;
+import ICInterpreter.*;
 
 public class Character {
     private Attribute base_data;
@@ -17,8 +18,10 @@ public class Character {
     }
 
     public void interpret() {
-        data = base_data.interpret();
+        Interpreter inter = new Interpreter();
+        inter.interpret(base_data);
+        //data = base_data.interpret();
 
-        data.print();
+        //data.print();
     }
 }

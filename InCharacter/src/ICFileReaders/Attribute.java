@@ -104,6 +104,7 @@ public class Attribute {
 
     public void addSubAttr(Attribute attr) {
         itemNumber++;
+        attr.setParentAttr(this);
         subAttrs.add(attr);
         //System.out.println(attr.name);
     }
@@ -177,6 +178,7 @@ public class Attribute {
 
 
     public Attribute interpret() {
+
         //System.out.println("Equations: " + equations.size());
         Attribute new_Attr = new Attribute();
         int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;

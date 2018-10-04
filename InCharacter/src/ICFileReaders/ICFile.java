@@ -34,7 +34,7 @@ public class ICFile {
     public void addSubAttr(String name) {
         Attribute newAttr = new Attribute(name);
         data.addSubAttr(newAttr);
-        newAttr.setParentAttr(data);
+        //newAttr.setParentAttr(data);
         data = newAttr;
     }
 
