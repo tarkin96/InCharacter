@@ -7,7 +7,7 @@ public class Attribute {
     private ArrayList<Attribute> subAttrs;
     private Map<String, Pair<Integer, String>> descriptions;
     private Map<String, Pair<Integer, Float>> values;
-    private Map<String, Pair<Integer, String>> equations;
+    private Map<String, Pair<Integer, String>> functions;
     private Attribute parentAttr;
     private String name;
     private int itemNumber;
@@ -15,7 +15,7 @@ public class Attribute {
     public Attribute() {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
-        equations = new LinkedHashMap<String, Pair<Integer, String>>();
+        functions = new LinkedHashMap<String, Pair<Integer, String>>();
         values = new LinkedHashMap<String, Pair<Integer, Float>>();
         name = "";
         itemNumber = 0;
@@ -24,7 +24,7 @@ public class Attribute {
     public Attribute(String text) {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
-        equations = new LinkedHashMap<String, Pair<Integer, String>>();
+        functions = new LinkedHashMap<String, Pair<Integer, String>>();
         values = new LinkedHashMap<String, Pair<Integer, Float>>();
         name = text;
         itemNumber = 0;
@@ -34,12 +34,12 @@ public class Attribute {
     //perform deep copy of attribute
     protected Attribute(Attribute other) {
         descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
-        equations = new LinkedHashMap<String, Pair<Integer, String>>();
+        functions = new LinkedHashMap<String, Pair<Integer, String>>();
         values = new LinkedHashMap<String, Pair<Integer, Float>>();
         subAttrs = new ArrayList<Attribute>();
         name = other.getName();
 
-        int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
+        int count = 1, subCount=0, valCount = 0, funCount = 0, descCount = 0;
 
         Iterator<Map.Entry<String, Pair<Integer, Float>>> valit = other.getValues().entrySet().iterator();
         Map.Entry<String, Pair<Integer, Float>> value = null;
@@ -53,10 +53,10 @@ public class Attribute {
             desc = descit.next();
         }
 
-        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = other.getEquations().entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> eq = null;
-        if (other.getEquations().size() != 0) {
-            eq = eqit.next();
+        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = other.getFunctions().entrySet().iterator();
+        Map.Entry<String, Pair<Integer, String>> fun = null;
+        if (other.getFunctions().size() != 0) {
+            fun = funit.next();
         }
 
         while (count <= other.getItemNumber()) {
@@ -80,14 +80,14 @@ public class Attribute {
                 }
 
             }
-            else if (other.getEquations().size() != 0 && eq.getValue().getKey() == count) {
+            else if (other.getFunctions().size() != 0 && fun.getValue().getKey() == count) {
                 count++;
-                eqCount++;
-                //copy equation element
-                addEquation(eq.getKey(), eq.getValue().getValue());
+                funCount++;
+                //copy function element
+                addFunction(fun.getKey(), fun.getValue().getValue());
 
-                if (eqit.hasNext()) {
-                    eq = eqit.next();
+                if (funit.hasNext()) {
+                    fun = funit.next();
                 }
 
             }
@@ -118,11 +118,11 @@ public class Attribute {
         else { System.out.println("This description already exists");}
     }
 
-    public void addEquation(String identifier, String eq) {
-        if (!equations.containsKey(identifier)) {
+    public void addFunction(String identifier, String fun) {
+        if (!functions.containsKey(identifier)) {
             itemNumber++;
-            equations.put(identifier, new Pair<Integer, String>(itemNumber, eq));
-            //System.out.println("hmph " + equations.size());
+            functions.put(identifier, new Pair<Integer, String>(itemNumber, fun));
+            //System.out.println("hmph " + functions.size());
             //System.out.println(identifier + " = " + desc);
         }
         else { System.out.println("This equation already exists");}
@@ -157,8 +157,8 @@ public class Attribute {
         return descriptions;
     }
 
-    public Map<String, Pair<Integer, String>> getEquations() {
-        return equations;
+    public Map<String, Pair<Integer, String>> getFunctions() {
+        return functions;
     }
 
     public Map<String, Pair<Integer, Float>> getValues() {
@@ -177,9 +177,9 @@ public class Attribute {
     }
 
 
-    public Attribute interpret() {
+    /*public Attribute interpret() {
 
-        //System.out.println("Equations: " + equations.size());
+        //System.out.println("functions: " + functions.size());
         Attribute new_Attr = new Attribute();
         int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
 
@@ -195,9 +195,9 @@ public class Attribute {
             desc = descit.next();
         }
 
-        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = equations.entrySet().iterator();
+        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = functions.entrySet().iterator();
         Map.Entry<String, Pair<Integer, String>> eq = null;
-        if (equations.size() != 0) {
+        if (functions.size() != 0) {
             eq = eqit.next();
         }
 
@@ -224,7 +224,7 @@ public class Attribute {
                 }
 
             }
-            else if (equations.size() != 0 && eq.getValue().getKey() == count) {
+            else if (functions.size() != 0 && eq.getValue().getKey() == count) {
                 //System.out.println("found desc");
                 count++;
                 eqCount++;
@@ -250,11 +250,11 @@ public class Attribute {
         }
 
         return new_Attr;
-    }
+    }*/
 
     public void print() {
 
-        //System.out.println("Equations: " + equations.size());
+        //System.out.println("functions: " + functions.size());
 
         int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
 
@@ -270,10 +270,10 @@ public class Attribute {
             desc = descit.next();
         }
 
-        Iterator<Map.Entry<String, Pair<Integer, String>>> eqit = equations.entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> eq = null;
-        if (equations.size() != 0) {
-            eq = eqit.next();
+        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = functions.entrySet().iterator();
+        Map.Entry<String, Pair<Integer, String>> fun = null;
+        if (functions.size() != 0) {
+            fun = funit.next();
         }
 
         while (count <= itemNumber) {
@@ -298,13 +298,13 @@ public class Attribute {
                 }
 
             }
-            else if (equations.size() != 0 && eq.getValue().getKey() == count) {
+            else if (functions.size() != 0 && fun.getValue().getKey() == count) {
                 //System.out.println("found desc");
                 count++;
                 eqCount++;
-                System.out.println(eq.getKey() + " = " + eq.getValue().getValue() + ";");
-                if (eqit.hasNext()) {
-                    eq = eqit.next();
+                System.out.println(fun.getKey() + " = " + fun.getValue().getValue() + ";");
+                if (funit.hasNext()) {
+                    fun = funit.next();
                 }
 
             }

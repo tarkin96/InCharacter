@@ -19,7 +19,8 @@ public class ICParser {
             Scanner scan = new Scanner(readFile);
             //this is where the magic happens
             while (scan.hasNextLine()) {
-                String line = scan.nextLine().replaceAll("\\s","");
+                String full_line = scan.nextLine();
+                String line = full_line.replaceAll("\\s","");
                 if (!line.equals("")) {
                     /*
                     IMPORTANT!!!!!
@@ -34,17 +35,17 @@ public class ICParser {
                         //check if line has a value
                         if (isNumeric(line.substring(line.indexOf("=") + 1, line.length() - 1))) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addValueToICFile(icfile, nameOfAttr, Integer.parseInt(line.substring(line.lastIndexOf("=") + 1, line.length() - 1)));
+                            addValueToICFile(icfile, nameOfAttr, Float.parseFloat(line.substring(line.lastIndexOf("=") + 1, line.length() - 1)));
                         }
                         // check if line has a description
-                        else if(line.substring(line.lastIndexOf("=") + 1).contains("\"")) {
+                        else if(line.substring(line.indexOf("=") + 1).substring(0,1).equals("\"")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addDescToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
+                            addDescToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("\""), full_line.lastIndexOf("\"")));
                         }
-                        //check if line has an equation
+                        //check if line has a function
                         else if(!line.equals(";")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addEqToICFile(icfile, nameOfAttr, line.substring(line.lastIndexOf("=") + 1, line.length() - 1));
+                            addFunToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("=") + 1, full_line.lastIndexOf(";")));
                         }
                         else {System.out.println("something is wrong");}
 
@@ -88,8 +89,8 @@ public class ICParser {
         //System.out.println("added stuff");
     }
 
-    public void addEqToICFile(ICFile file, String name, String eq) {
-        file.addEq(name, eq);
+    public void addFunToICFile(ICFile file, String name, String fun) {
+        file.addEq(name, fun);
         //System.out.println("added stuff");
     }
 
@@ -113,8 +114,8 @@ public class ICParser {
 
     public String findEquation(Attribute icfile, String name) {
         //find equation in current attribute
-        if(icfile.getEquations().get(name) != null) {
-            return icfile.getEquations().get(name).getValue();
+        if(icfile.getFunctions().get(name) != null) {
+            return icfile.getFunctions().get(name).getValue();
         }
         else {
             return null;

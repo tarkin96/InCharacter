@@ -50,7 +50,7 @@ public class ICFile {
 
     //add an equation
     public void addEq(String name, String eq) {
-        data.addEquation(name, eq);
+        data.addFunction(name, eq);
     }
 
     //sets current Attribute to the parent attribute

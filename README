@@ -1,0 +1,29 @@
+In Character
+
+This is the README file for the entire In Character project. 
+
+"In Character" is essentially a Table-Top Roleplaying Game engine. Essentially, "In Character"
+allows users to create their own game rules for table-top roleplaying games (such as Dungeons
+and Dragons, Pathfinder, and Warhammer 40k). In doing so, users can also generate player and
+non-player characters that would exist in this game. Ideally, the system can also be extended
+to creating rule sets for games which are not table-top (such as The Elder Scrolls, Fallout, or
+Dragon Age). 
+
+Currently the system works off of a file type called "ICFile." The user essentially "programs"
+the rule set using this file type. In Character reads this file and saves it as a rule set that
+users can generate characters for. 
+
+In Character is written in Java using only standard libraries using the IntelliJ IDE. All work is
+my own, unless specified in the file which the 3rd-party work is contained. 
+
+Main features:
+	1. User writes an ICFile script representing a game's ruleset. 
+	2. Users can generate characters and track character progress based on game rulesets. 
+	3. File system will allow users to add onto the In Character program and libraries.
+
+Future Plans:
+	1. Allow users to upload characters to In Character.
+	2. Add a user interface to make character generation easier.
+	3. Make a website for In Character to allow users online access to characters.
+	4. Add a customizable interface to allow users to assign "character sheets" to a rule set.
+	5. Allow In Character to generate characters in other file formats (PDF, Word, etc). 
