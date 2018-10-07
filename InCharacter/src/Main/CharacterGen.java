@@ -1,5 +1,6 @@
 package Main;
-import ICFileReaders.*;
+import ICFiles.*;
+import ICFiles.Character;
 
 public class CharacterGen {
 

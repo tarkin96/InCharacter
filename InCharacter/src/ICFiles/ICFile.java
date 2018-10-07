@@ -1,7 +1,7 @@
-package ICFileReaders;
+package ICFiles;
 
 public class ICFile {
-    private Attribute data;
+    protected Attribute data;
     //private Attribute currAttr;
     private String path;
     private String name;

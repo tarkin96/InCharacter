@@ -1,4 +1,4 @@
-package ICFileReaders;
+package ICFiles;
 import javafx.util.Pair;
 
 import java.util.*;

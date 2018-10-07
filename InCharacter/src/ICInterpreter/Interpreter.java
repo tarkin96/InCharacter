@@ -1,5 +1,5 @@
 package ICInterpreter;
-import ICFileReaders.*;
+import ICFiles.*;
 
 public class Interpreter {
 
@@ -14,17 +14,6 @@ public class Interpreter {
             //interpret that attribute
             interpret(attr.getSubAttrs().get(subAttrNum));
         }
-        /*
-
-                read the equations map
-                for each equation
-                    got an attribute in it?
-                    find attribute (search equations and values)
-
-
-
-
-         */
     }
 
 }

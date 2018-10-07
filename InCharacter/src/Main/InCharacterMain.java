@@ -1,5 +1,5 @@
 package Main;
-import ICFileReaders.*;
+import ICFiles.*;
 
 public class InCharacterMain {
 
@@ -8,7 +8,7 @@ public class InCharacterMain {
         InCharacter inst = new InCharacter();
         inst.Launch();
 
-        ICFileParser parser = new ICFileParser();
+        ICParser parser = new ICParser();
         ICFile icfile = parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Config\\Rule Sets\\WadeRules\\Base.txt");
         //icfile.print();
 

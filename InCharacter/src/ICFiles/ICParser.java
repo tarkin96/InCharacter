@@ -1,12 +1,10 @@
-package ICFileReaders;
+package ICFiles;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
-public class ICFileParser {
+public class ICParser {
     //creates an ICFile from a file path
     public ICFile parse(String file_path) {
 
@@ -69,9 +67,7 @@ public class ICFileParser {
     }
 
     //finds data in ICFile
-    public Float findVal(Attribute icfile, String name) {
-        return 1.0f;
-    }
+
 
 
 
@@ -106,16 +102,48 @@ public class ICFileParser {
 
 
     // these methods are used to find objects in an attribute
+    public Float findVal(Attribute icfile, String name) {
+        if (icfile.getValues().get(name) != null) {
+            return icfile.getValues().get(name).getValue();
+        }
+        else {
+            return null;
+        }
+    }
 
     public String findEquation(Attribute icfile, String name) {
-        return "";
+        //find equation in current attribute
+        if(icfile.getEquations().get(name) != null) {
+            return icfile.getEquations().get(name).getValue();
+        }
+        else {
+            return null;
+        }
     }
+
     public String findDescription(Attribute icfile, String name) {
-        return "";
+        //find description in current attribute
+        if(icfile.getDescriptions().get(name) != null) {
+            return icfile.getDescriptions().get(name).getValue();
+        }
+        else {
+            return null;
+        }
     }
     public Attribute findAttribute(Attribute icfile, String name) {
-        return new Attribute("");
+        //search for sub attribute in current attribute
+        for (int i = 0; i < icfile.getSubAttrs().size(); i++) {
+            if (icfile.getSubAttrs().get(i).getName().equals(name)) {
+                return icfile.getSubAttrs().get(i);
+            }
+        }
+        //search for attribute in branch
+        if (icfile.getParentAttr() != null) {
+            return findAttribute(icfile.getParentAttr(), name);
+        }
+        return null;
     }
+
     public Object findData(Attribute icfile, String name) {
         return new Object();
     }

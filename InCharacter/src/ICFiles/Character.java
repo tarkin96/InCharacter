@@ -1,6 +1,5 @@
-package Main;
+package ICFiles;
 
-import ICFileReaders.*;
 import ICInterpreter.*;
 
 public class Character {
