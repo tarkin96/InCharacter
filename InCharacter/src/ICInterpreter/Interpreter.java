@@ -18,9 +18,9 @@ public class Interpreter {
     }
 
 
-    public void interpret (Attribute attr) {
-
-        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = attr.getFunctions().entrySet().iterator();
+    public Attribute interpret (Attribute attr) {
+        Attribute newAttr = attr.copy();
+        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = newAttr.getFunctions().entrySet().iterator();
         Map.Entry<String, Pair<Integer, String>> fun = null;
 
         //for each function in the attribute
@@ -28,25 +28,44 @@ public class Interpreter {
 
             fun = funit.next();
             //resolve equation
-            resolve(attr, fun.getValue().getValue());
+            resolve(newAttr, fun.getValue().getValue());
         }
 
         //for each sub attribute in the attribute
-        for (int subAttrNum = 0; subAttrNum < attr.getSubAttrs().size(); subAttrNum++) {
+        for (int subAttrNum = 0; subAttrNum < newAttr.getSubAttrs().size(); subAttrNum++) {
             //interpret that attribute
-            interpret(attr.getSubAttrs().get(subAttrNum));
+            interpret(newAttr.getSubAttrs().get(subAttrNum));
         }
+        return newAttr;
     }
 
 
     private void resolve(Attribute attr, String funct) {
-        System.out.println("made it!");
+        //System.out.println("made it!");
         ArrayList<String> parts = getStringParts(funct);
         for (int i = 0; i < parts.size(); i++) {
 
             System.out.println(parts.get(i));
         }
         //scan for equations or values
+        for (int i = 0; i < parts.size(); i++) {
+            //check if element is reserved
+            if (false) {
+                //do something
+            }
+            //if not numeric
+            else if (false) {
+                //resolve recursively
+                //if it references sub attribute
+                interpret_var(attr, parts.get(i));
+            }
+            //if numeric
+            else if(false) {
+                //do nothing
+            }
+            //do logic of line and return value
+
+        }
         //resolve equations and values
 
         //split function into parts
@@ -114,6 +133,37 @@ public class Interpreter {
 
     private boolean isReserved(String str) {
         return reserved_symbols.contains(str);
+    }
+
+    private String interpret_var(Attribute attr, String variable) {
+        ICParser parser = new ICParser();
+        //String whatsleft = variable;
+        if (variable.contains(".")) {
+            interpret_var(parser.findAttribute(attr, variable.substring(0, variable.indexOf("."))),
+                    variable.substring(variable.indexOf(".") + 1, variable.length()));
+        }
+        else {
+            Float check_val = parser.findVal(attr, variable);
+            String check_desc = null;
+            String check_func = null;
+            if (check_val == null) {
+                check_desc = parser.findDescription(attr, variable);
+            }
+            else {
+                return check_val.toString();
+            }
+            if (check_desc == null) {
+                check_func = parser.findFunct(attr, variable);
+            }
+            else {
+                return check_desc;
+            }
+            if (check_func == null) {
+                return null;
+            }
+
+        }
+        return "";
     }
 
 }

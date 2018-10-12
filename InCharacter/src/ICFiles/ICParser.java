@@ -112,7 +112,7 @@ public class ICParser {
         }
     }
 
-    public String findEquation(Attribute icfile, String name) {
+    public String findFunct(Attribute icfile, String name) {
         //find equation in current attribute
         if(icfile.getFunctions().get(name) != null) {
             return icfile.getFunctions().get(name).getValue();
