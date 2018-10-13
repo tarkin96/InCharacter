@@ -22,8 +22,8 @@ public class Character {
     public void interpret() {
         Interpreter inter = new Interpreter();
         data = inter.interpret(base_data);
-        //data = base_data.interpret();
 
-        //print();
+
+        print();
     }
 }

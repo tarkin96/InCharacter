@@ -10,6 +10,8 @@ public class Interpreter {
 
     private ArrayList<String> reserved_symbols;
 
+
+
     public Interpreter() {
         reserved_symbols = new ArrayList<String>();
         reserved_symbols.add("+"); reserved_symbols.add("-"); reserved_symbols.add("*");
@@ -18,34 +20,24 @@ public class Interpreter {
     }
 
 
+
     public Attribute interpret (Attribute attr) {
         Attribute newAttr = attr.copy();
-        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = newAttr.getFunctions().entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> fun = null;
-
-        //for each function in the attribute
-        while (funit.hasNext()) {
-
-            fun = funit.next();
-            //resolve equation
-            resolve(newAttr, fun.getValue().getValue());
-        }
-
-        //for each sub attribute in the attribute
-        for (int subAttrNum = 0; subAttrNum < newAttr.getSubAttrs().size(); subAttrNum++) {
-            //interpret that attribute
-            interpret(newAttr.getSubAttrs().get(subAttrNum));
-        }
+        recInterpret(newAttr);
         return newAttr;
     }
 
+    private void recInterpret(Attribute attr) {
 
-    private void resolve(Attribute attr, String funct) {
+    }
+
+    //gives value of line
+    private String resolve(Attribute attr, String key, String funct) {
         //System.out.println("made it!");
         ArrayList<String> parts = getStringParts(funct);
         for (int i = 0; i < parts.size(); i++) {
 
-            System.out.println(parts.get(i));
+            //System.out.println(parts.get(i));
         }
         //scan for equations or values
         for (int i = 0; i < parts.size(); i++) {
@@ -54,24 +46,25 @@ public class Interpreter {
                 //do something
             }
             //if not numeric
-            else if (false) {
+            else if (!isNumeric(parts.get(i))) {
                 //resolve recursively
                 //if it references sub attribute
-                interpret_var(attr, parts.get(i));
+                parts.set(i, interpret_var(attr, parts.get(i)));
             }
             //if numeric
             else if(false) {
                 //do nothing
             }
-            //do logic of line and return value
 
         }
-        //resolve equations and values
-
-        //split function into parts
 
 
-        //resolve simplified equation
+        //placeholder for actual resolve of item
+        String retStr = new String();
+        for (int j = 0; j < parts.size(); j++) {
+            retStr+=parts.get(j);
+        }
+        return retStr;
     }
 
     private ArrayList<String> getStringParts(String funct) {
@@ -154,6 +147,7 @@ public class Interpreter {
             }
             if (check_desc == null) {
                 check_func = parser.findFunct(attr, variable);
+
             }
             else {
                 return check_desc;
@@ -161,9 +155,23 @@ public class Interpreter {
             if (check_func == null) {
                 return null;
             }
+            else {
+                //resolve the new function in the attribute
+                //check_func = resolve(attr, variable, check_func);
+                return check_func;
+            }
 
         }
         return "";
+    }
+
+
+
+
+
+
+    private boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
     }
 
 }
