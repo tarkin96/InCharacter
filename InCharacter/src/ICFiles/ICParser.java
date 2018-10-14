@@ -40,7 +40,7 @@ public class ICParser {
                         // check if line has a description
                         else if(line.substring(line.indexOf("=") + 1).substring(0,1).equals("\"")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addDescToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("\""), full_line.lastIndexOf("\"")));
+                            addDescToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("\""), full_line.lastIndexOf("\"") + 1));
                         }
                         //check if line has a function
                         else if(!line.equals(";")) {
@@ -105,7 +105,8 @@ public class ICParser {
     // these methods are used to find objects in an attribute
     public Float findVal(Attribute icfile, String name) {
         if (icfile.getValues().get(name) != null) {
-            return icfile.getValues().get(name).getValue();
+
+            return icfile.getValues().get(name);
         }
         else {
             return null;
@@ -115,7 +116,7 @@ public class ICParser {
     public String findFunct(Attribute icfile, String name) {
         //find equation in current attribute
         if(icfile.getFunctions().get(name) != null) {
-            return icfile.getFunctions().get(name).getValue();
+            return icfile.getFunctions().get(name);
         }
         else {
             return null;
@@ -125,7 +126,7 @@ public class ICParser {
     public String findDescription(Attribute icfile, String name) {
         //find description in current attribute
         if(icfile.getDescriptions().get(name) != null) {
-            return icfile.getDescriptions().get(name).getValue();
+            return icfile.getDescriptions().get(name);
         }
         else {
             return null;

@@ -28,7 +28,14 @@ public class Interpreter {
     }
 
     private void recInterpret(Attribute attr) {
-
+        for (int i = 0; i < attr.getMappings().size(); i++) {
+            if (attr.getFunctions().containsKey(attr.getMappings().get(i))) {
+                resolve(attr, attr.getMappings().get(i), attr.getFunctions().get(attr.getMappings().get(i)));
+            }
+        }
+        for (int i = 0; i < attr.getSubAttrs().size(); i++) {
+            recInterpret(attr.getSubAttrs().get(i));
+        }
     }
 
     //gives value of line
@@ -36,8 +43,7 @@ public class Interpreter {
         //System.out.println("made it!");
         ArrayList<String> parts = getStringParts(funct);
         for (int i = 0; i < parts.size(); i++) {
-
-            //System.out.println(parts.get(i));
+            System.out.println(parts.get(i));
         }
         //scan for equations or values
         for (int i = 0; i < parts.size(); i++) {
@@ -58,12 +64,26 @@ public class Interpreter {
 
         }
 
-
         //placeholder for actual resolve of item
         String retStr = new String();
         for (int j = 0; j < parts.size(); j++) {
             retStr+=parts.get(j);
         }
+
+        //resolve parts as a whole
+
+        //place new object into appropriate map
+        if (isNumeric(retStr)) {
+            attr.addValue(key, Float.parseFloat(retStr));
+        }
+        else if (retStr.contains("\"")) {
+            attr.addDescription(key, retStr);
+        }
+        else {
+            System.out.println("Something went wrong with resolving function!");
+        }
+        //remove function from function map
+        attr.removeFunction(key);
         return retStr;
     }
 
@@ -76,14 +96,14 @@ public class Interpreter {
         while (count < funct.length()) {
             //if window is empty space
             if(funct.substring(look_back, count+1).trim().length() == 0) {
-                System.out.println("Emtpy Space");
+                //System.out.println("Emtpy Space");
                 count++;
             }
             //window contains other characters
             else {
                 //if current character is reserved
                 if(isReserved(funct.substring(count, count + 1))) {
-                    System.out.println("Reserved Character");
+                    //System.out.println("Reserved Character");
                     //check to add previous characters to parts list
                     if (!(funct.substring(look_back, look_back+1).trim().length() == 0)) {
                         parts.add(funct.substring(look_back, count));
@@ -97,7 +117,7 @@ public class Interpreter {
                 else {
                     //if look back is white space (found a new word)
                     if (funct.substring(look_back, look_back + 1).trim().length() == 0) {
-                        System.out.println("Found word at " + count);
+                        //System.out.println("Found word at " + count);
                         look_back = count;
                     }
                     //if look back is a character
@@ -105,7 +125,7 @@ public class Interpreter {
                         //if count is whitespace (found end of word)
                         if (funct.substring(count, count+ 1).trim().length() == 0) {
                             parts.add(funct.substring(look_back, count));
-                            System.out.println("End of word: lookback = " + look_back + " count = " + count);
+                            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
                             look_back = count;
                         }
 
@@ -117,7 +137,7 @@ public class Interpreter {
         //add last word of line
         if (!(funct.substring(look_back, look_back + 1).trim().length() == 0)) {
             parts.add(funct.substring(look_back, count));
-            System.out.println("End of word: lookback = " + look_back + " count = " + count);
+            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
             look_back = count;
         }
 
@@ -132,11 +152,13 @@ public class Interpreter {
         ICParser parser = new ICParser();
         //String whatsleft = variable;
         if (variable.contains(".")) {
-            interpret_var(parser.findAttribute(attr, variable.substring(0, variable.indexOf("."))),
+            System.out.println("moved to next level of variable!");
+            return interpret_var(parser.findAttribute(attr, variable.substring(0, variable.indexOf("."))),
                     variable.substring(variable.indexOf(".") + 1, variable.length()));
         }
         else {
             Float check_val = parser.findVal(attr, variable);
+
             String check_desc = null;
             String check_func = null;
             if (check_val == null) {
@@ -157,12 +179,12 @@ public class Interpreter {
             }
             else {
                 //resolve the new function in the attribute
-                //check_func = resolve(attr, variable, check_func);
+                check_func = resolve(attr, variable, check_func);
                 return check_func;
             }
 
         }
-        return "";
+        //return "";
     }
 
 

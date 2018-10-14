@@ -13,4 +13,6 @@ Attributes =
 	Charisma = 0;
 ;
 
-Health = Constitution * 5;
+Health = Attributes.Constitution;
+
+Constitution = 5;
