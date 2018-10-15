@@ -1,7 +1,0 @@
-//Name of the rule set
-Name = Wade's Rules;
-
-//Rule set
-Attributes = 
-	Strength = 18;
-	

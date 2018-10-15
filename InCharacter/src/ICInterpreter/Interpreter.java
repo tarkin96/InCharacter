@@ -87,66 +87,7 @@ public class Interpreter {
         return retStr;
     }
 
-    private ArrayList<String> getStringParts(String funct) {
-        ArrayList<String> parts = new ArrayList<String>();
-        if (funct.equals("")) {return parts;}
-        int count = 0;
-        int look_back = 0;
 
-        while (count < funct.length()) {
-            //if window is empty space
-            if(funct.substring(look_back, count+1).trim().length() == 0) {
-                //System.out.println("Emtpy Space");
-                count++;
-            }
-            //window contains other characters
-            else {
-                //if current character is reserved
-                if(isReserved(funct.substring(count, count + 1))) {
-                    //System.out.println("Reserved Character");
-                    //check to add previous characters to parts list
-                    if (!(funct.substring(look_back, look_back+1).trim().length() == 0)) {
-                        parts.add(funct.substring(look_back, count));
-                    }
-                    //add reserved character to list
-                    parts.add(funct.substring(count, count+1));
-                    //move look back to count
-                    count++;
-                    look_back = count;
-                }
-                else {
-                    //if look back is white space (found a new word)
-                    if (funct.substring(look_back, look_back + 1).trim().length() == 0) {
-                        //System.out.println("Found word at " + count);
-                        look_back = count;
-                    }
-                    //if look back is a character
-                    else {
-                        //if count is whitespace (found end of word)
-                        if (funct.substring(count, count+ 1).trim().length() == 0) {
-                            parts.add(funct.substring(look_back, count));
-                            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
-                            look_back = count;
-                        }
-
-                    }
-                    count++;
-                }
-            }
-        }
-        //add last word of line
-        if (!(funct.substring(look_back, look_back + 1).trim().length() == 0)) {
-            parts.add(funct.substring(look_back, count));
-            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
-            look_back = count;
-        }
-
-        return parts;
-    }
-
-    private boolean isReserved(String str) {
-        return reserved_symbols.contains(str);
-    }
 
     private String interpret_var(Attribute attr, String variable) {
         ICParser parser = new ICParser();
@@ -187,7 +128,66 @@ public class Interpreter {
         //return "";
     }
 
+    private ArrayList<String> getStringParts(String funct) {
+        ArrayList<String> parts = new ArrayList<String>();
+        if (funct.equals("")) {return parts;}
+        int count = 0;
+        int look_back = 0;
 
+        while (count < funct.length()) {
+            //if window is empty space
+            if(funct.substring(look_back, count+1).trim().length() == 0) {
+                //System.out.println("Emtpy Space");
+                count++;
+            }
+            //window contains other characters
+            else {
+                //if current character is reserved
+                if(isReserved(funct.substring(count, count + 1))) {
+                    //System.out.println("Reserved Character");
+                    //check to add previous characters to parts list
+                    if (!(funct.substring(look_back, look_back+1).trim().length() == 0)) {
+                        parts.add(funct.substring(look_back, count));
+                    }
+                    //add reserved character to list
+                    parts.add(funct.substring(count, count+1));
+                    //move look back to count
+                    count++;
+                    look_back = count;
+                }
+                else {
+                    //if look back is white space (found a new word) or a reserved character
+                    if (funct.substring(look_back, look_back + 1).trim().length() == 0 || isReserved(funct.substring(look_back, look_back + 1))) {
+                        //System.out.println("Found word at " + count);
+                        look_back = count;
+                    }
+                    //if look back is a character
+                    else {
+                        //if count is whitespace (found end of word)
+                        if (funct.substring(count, count+ 1).trim().length() == 0) {
+                            parts.add(funct.substring(look_back, count));
+                            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
+                            look_back = count;
+                        }
+
+                    }
+                    count++;
+                }
+            }
+        }
+        //add last word of line
+        if (!(funct.substring(look_back, look_back + 1).trim().length() == 0)) {
+            parts.add(funct.substring(look_back, count));
+            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
+            look_back = count;
+        }
+
+        return parts;
+    }
+
+    private boolean isReserved(String str) {
+        return reserved_symbols.contains(str);
+    }
 
 
 

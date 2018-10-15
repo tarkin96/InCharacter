@@ -2,16 +2,16 @@ In Character
 
 This is the README file for the entire In Character project. 
 
-"In Character" is essentially a Table-Top Roleplaying Game engine. Essentially, "In Character"
+"In Character" is a Table-Top Roleplaying Game engine. Essentially, "In Character"
 allows users to create their own game rules for table-top roleplaying games (such as Dungeons
 and Dragons, Pathfinder, and Warhammer 40k). In doing so, users can also generate player and
 non-player characters that would exist in this game. Ideally, the system can also be extended
 to creating rule sets for games which are not table-top (such as The Elder Scrolls, Fallout, or
 Dragon Age). 
 
-Currently the system works off of a file type called "ICFile." The user essentially "programs"
-the rule set using this file type. In Character reads this file and saves it as a rule set that
-users can generate characters for. 
+Currently the system works off of a file type called "ICFile." The user "programs" the rule set
+using this file type. In Character reads this file and saves it as a rule set that users can 
+generate characters for. 
 
 In Character is written in Java using only standard libraries using the IntelliJ IDE. All work is
 my own, unless specified in the file which the 3rd-party work is contained. 
@@ -27,3 +27,80 @@ Future Plans:
 	3. Make a website for In Character to allow users online access to characters.
 	4. Add a customizable interface to allow users to assign "character sheets" to a rule set.
 	5. Allow In Character to generate characters in other file formats (PDF, Word, etc). 
+
+
+
+---------------------------------------------------------------------------------------------------
+Config Folder
+---------------------------------------------------------------------------------------------------
+The config folder holds the configuration details for IC specifically. Currently, it is mainly a 
+place holder, but actual configuration options will be added in the future. It is planned to hold
+data about saved rule sets, saved characters, and custom info for the IC program.
+
+---------------------------------------------------------------------------------------------------
+Rule Sets
+---------------------------------------------------------------------------------------------------
+Rule sets contain the rules for a game uploaded into IC. It has a format that allows a user to 
+program the rule set into IC and generate characters for it. 
+
+Rule sets contain the following:
+	1. The main attributes of a character, along with sub-attributes (recursive data structure). 
+	2. Functions for calculating attributes.
+	3. Descriptions of attributes. These descriptions do not have a functional role. They are meant
+	   for user knowledge. 
+	4. Values for an attribute. 
+
+Rule sets information is stored in-order. 
+
+---------------------------------------------------------------------------------------------------
+Character Sheets
+---------------------------------------------------------------------------------------------------
+Character sheets are files that store information specific to a character. They have the same
+structure as a rule set file, meaning character sheets can act as rule sets. A partially completed
+character sheet allows a user to generate characters that all have similar attributes. A fully
+complete character sheet, when treated as a rule set, will always generate the same chracter. 
+
+---------------------------------------------------------------------------------------------------
+Structure of Rule Sets
+---------------------------------------------------------------------------------------------------
+An attribute is a trait that a character has. An attribute is marked by a name, followed by an "="
+sign. After the sign, the information of the attribute is given, followed by a semicolon at the
+end. A simple example is below:
+
+Name = "Wade";
+Traits = 
+	Strength = 10;
+	Dexterity = 5;
+	Intelligence = 1:15;
+;
+Armor = Traits.Dexterity * 2;
+Items = 
+	Storage = 
+		Shield = "Bulwark of Evil";
+	;
+;
+
+In the above, lies all the possible types of attributes. Name gives an example of a description. 
+Giving the name "Wade" has no functional purpose, but serves as information for the owner of the
+owner of the chracter. Traits is a full attribute. It contains values and descriptions. Strength,
+as a subattribute of traits, contains a value. Armor is a function, using the value of dexterity
+to determine the value of Armor. Storage is another full attribute stored within the attribute
+Items, giving this file a recursive structure. Character sheets will have this same structure, but
+most or all functions will be resolved to have descriptions or values. 
+
+---------------------------------------------------------------------------------------------------
+Data Structure
+---------------------------------------------------------------------------------------------------
+Since the file has a recursive structure, the data structure storing the data of the file will also
+be recursive. Each object is an "Attribute" object. Within an Attribute, there is an ArrayList of
+Attributes (called "subattrs"), giving the data structure its recursive nature. 
+
+Also attached to each Attribute object are the values, descriptions, and functions. Each of these
+items are represented as a HashMap. The hasmap allows the data to be searched by name and at a 
+time complexity of O(1). However, the data is not stored in-order by insertion. However, to keep 
+the data in order for printing and loading, another ArrayList was implemented to keep track of the
+order of the data. This list is called the "mappings". This structure is similar to Java's 
+LinkedHashMap collection, which is where the inspiration came from. However, implementing the list 
+part of the data structure myself allows one to change the order of the data when needed. The 
+LinkedHashMap collection forces users to have insertion order, whereas my list operates by 
+insertion order only by default. 
