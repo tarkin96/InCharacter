@@ -1,8 +1,16 @@
-Nickname = "";
+Character_Name = "";
 
-Age = 0;
+Level = 0;
+
+Class = "";
+
+Player_Name = "";
 
 Race = "";
+
+Alignment = "";
+
+Experience_Points = 0;
 
 Attributes =
 	Stength = 0;
@@ -13,6 +21,152 @@ Attributes =
 	Charisma = 0;
 ;
 
-Health = Attributes.Constitution;
+Saving_Throws = 
+	Strength = 
+		Value = 0;
+		Focus = "";
+	;
+	Dexterity =
+		Value = 0;
+		Focus = "";
+	;	
+	Constitution = 
+		Value = 0;
+		Focus = "";
+	;
+	Intelligence = 
+		Value = 0;
+		Focus = "";
+	;
+	Wisdom = 
+		Value = 0;
+		Focus = "";
+	;
+	Charisma = 
+		Value = 0;
+		Focus = "";
+	;
+;
 
-Constitution = 5;
+Skills = 
+	Acrobatics =
+		Value = 0;
+		Focus = "";
+	;
+	Animal_Handling =
+		Value = 0;
+		Focus = "";
+	;
+	Arcana =
+		Value = 0;
+		Focus = "";
+	;
+	Athletics = 
+		Value = 0;
+		Focus = "";
+	;
+	Deception =
+		Value = 0;
+		Focus = "";
+	;
+	History =
+		Value = 0;
+		Focus = "";
+	;
+	Insight =
+		Value = 0;
+		Focus = "";
+	;
+	Intimidation =
+		Value = 0;
+		Focus = "";
+	;
+	Investigation =
+		Value = 0;
+		Focus = "";
+	;
+	Medicine =
+		Value = 0;
+		Focus = "";
+	;
+	Nature =
+		Value = 0;
+		Focus = "";
+	;
+	Perception =
+		Value = 0;
+		Focus = "";
+	;
+	Performance =
+		Value = 0;
+		Focus = "";
+	;
+	Persuasion =
+		Value = 0;
+		Focus = "";
+	;
+	Religion =
+		Value = 0;
+		Focus = "";
+	;
+	Sleight of Hand =
+		Value = 0;
+		Focus = "";
+	;
+	Stealth =
+		Value = 0;
+		Focus = "";
+	;
+	Survival =
+		Value = 0;
+		Focus = "";
+	;
+;
+
+Life_Stats = 
+	Passive Wisdom = 0;
+
+	Armor_Class = 0;
+
+	Initiative = 0;
+
+	Speed = 0;
+
+	Hit_Point_Maximum = 0;
+
+	Current_Hit_Points = 0;
+
+	Temporary_Hit_Points = 0;
+
+	Hit_Dice = 
+		Type = "";
+		Total = 0;
+	;
+
+	Death_Saves = 
+		Successes = 0;
+		Failures = 0;
+	;
+;
+
+Attacks_and_Spellcasting = 
+	Text = "";
+;
+
+Other_Proficiencies_and_Languages = 
+	Text = "";
+;
+
+Equipment = 
+	CP = 0;
+	SP = 0;
+	EP = 0;
+	GP = 0;
+	PP = 0;
+	Text = 0;
+;
+
+Features_and_Traits = 
+	Text = "";
+;
+

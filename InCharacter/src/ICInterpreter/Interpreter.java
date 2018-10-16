@@ -2,31 +2,60 @@ package ICInterpreter;
 
 import ICFiles.*;
 import javafx.util.Pair;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 
 public class Interpreter {
 
     private ArrayList<String> reserved_symbols;
+    private String reserved_file;
+    private static Interpreter instance = null;
 
 
+    public static Interpreter getInstance()
+    {
+        if (instance == null)
+            instance = new Interpreter();
 
-    public Interpreter() {
-        reserved_symbols = new ArrayList<String>();
-        reserved_symbols.add("+"); reserved_symbols.add("-"); reserved_symbols.add("*");
-        reserved_symbols.add("/"); reserved_symbols.add("="); reserved_symbols.add("(");
-        reserved_symbols.add(")"); reserved_symbols.add("||"); reserved_symbols.add("&&");
+        return instance;
     }
 
 
+    private Interpreter() {
+        reserved_file = "";
+        reserved_symbols = new ArrayList<String>();
+    }
 
+    public void init(String filename) {
+        reserved_file = filename;
+
+        //get all reserved words from configuration
+        File file = new File(filename);
+        try {
+            Scanner scan = new Scanner(file);
+            while (scan.hasNextLine()) {
+                reserved_symbols.add(scan.nextLine());
+            }
+        }
+        catch (IOException e) {
+
+        }
+
+    }
+
+    //begin interpretation of lines
     public Attribute interpret (Attribute attr) {
         Attribute newAttr = attr.copy();
         recInterpret(newAttr);
         return newAttr;
     }
 
+    //goes through all functions and tries to resolve them
     private void recInterpret(Attribute attr) {
         for (int i = 0; i < attr.getMappings().size(); i++) {
             if (attr.getFunctions().containsKey(attr.getMappings().get(i))) {
@@ -38,29 +67,19 @@ public class Interpreter {
         }
     }
 
-    //gives value of line
+    //interprets an entire line and returns resolved value
     private String resolve(Attribute attr, String key, String funct) {
         //System.out.println("made it!");
         ArrayList<String> parts = getStringParts(funct);
-        for (int i = 0; i < parts.size(); i++) {
-            System.out.println(parts.get(i));
-        }
         //scan for equations or values
         for (int i = 0; i < parts.size(); i++) {
-            //check if element is reserved
-            if (false) {
-                //do something
-            }
-            //if not numeric
-            else if (!isNumeric(parts.get(i))) {
+            //interpret all the variables in the line first
+            if (!isNumeric(parts.get(i)) && !isReserved(parts.get(i))) {
                 //resolve recursively
                 //if it references sub attribute
                 parts.set(i, interpret_var(attr, parts.get(i)));
             }
-            //if numeric
-            else if(false) {
-                //do nothing
-            }
+            //begin interpretting whole line
 
         }
 
@@ -90,7 +109,7 @@ public class Interpreter {
 
 
     private String interpret_var(Attribute attr, String variable) {
-        ICParser parser = new ICParser();
+        ICParser parser = ICParser.getInstance();
         //String whatsleft = variable;
         if (variable.contains(".")) {
             System.out.println("moved to next level of variable!");

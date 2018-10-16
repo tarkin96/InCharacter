@@ -20,7 +20,7 @@ public class Character {
     }
 
     public void interpret() {
-        Interpreter inter = new Interpreter();
+        Interpreter inter = Interpreter.getInstance();
         data = inter.interpret(base_data);
 
 

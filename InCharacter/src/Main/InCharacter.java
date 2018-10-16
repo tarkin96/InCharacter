@@ -8,52 +8,59 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import ICFiles.*;
+import ICInterpreter.Interpreter;
+
 public class InCharacter {
 
+    private ICParser parser;
+    private Interpreter interpreter;
     private String ICFilePath;
+    private String configPath;
     private File configFile;
     private List<String> defaultConfig;
-    private List<RuleSet> ruleSets;
 
-    public void Launch () {
-        if(Config()) {
-            LoadRuleSets();
-        }
+    public InCharacter() {
+        ICFilePath = "";
+        configPath = "Data/Config/";
+        interpreter = Interpreter.getInstance();
+        parser = ICParser.getInstance();
     }
 
-    private void LoadRuleSets() {
+    public void Launch () {
+        if(!Config()) {
+            return;
+        }
+        interpreter.init(ICFilePath + configPath + "reserved_words.txt");
 
+        ICFile icfile = parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Data\\Rule Sets\\WadeRules\\Base.txt");
+
+        CharacterGen charGen = new CharacterGen();
+        charGen.genCharacter(icfile);
+
+        //icfile.print();
 
     }
 
     private boolean Config() {
         try {
-            File configFolder = new File("Config");
-
+            File configFolder = new File(ICFilePath + configPath);
+            //if config folder exists
             if (configFolder.isDirectory()) {
-                configFile = new File("Config/config.txt");
+                configFile = new File(ICFilePath + configPath + "config.txt");
+                //if IC is missing a config file
                 if (!configFile.isFile()) {
-                    //create config file
+                    //create default config file
                     System.out.println("Creating config file!");
-
-                    new File("Config/config.txt").createNewFile();
-                    configFile = new File("Config/config.txt");
-
-                    //write default content
-                    defaultConfig = new ArrayList<String>();
-                    defaultConfig.add("Path = " + System.getProperty("user.dir") + ";");
-                    Files.write(Paths.get(configFile.getPath()), defaultConfig, Charset.forName("UTF-8"));
+                    createDefaultConfig();
                 }
                 //read from file
+                System.out.println("Getting confgi info!");
                 Scanner scan = new Scanner(configFile);
                 List<String> ConfigContent = new ArrayList<String>();
                 while (scan.hasNextLine()) {
                     ConfigContent.add(scan.nextLine());
                 }
-
-                /*for (String s : ConfigContent ) {
-                    System.out.println(s);
-                }*/
                 return true;
             } else {
                 //exit program
@@ -69,5 +76,20 @@ public class InCharacter {
 
     }
 
+
+    private void createDefaultConfig() {
+        try {
+            new File(ICFilePath + configPath + "config.txt").createNewFile();
+            configFile = new File(ICFilePath + configPath + "config.txt");
+
+            //write default content
+            defaultConfig = new ArrayList<String>();
+            defaultConfig.add("Path = " + ICFilePath + ";");
+            Files.write(Paths.get(configFile.getPath()), defaultConfig, Charset.forName("UTF-8"));
+        }
+        catch(IOException e) {
+
+        }
+    }
 
 }

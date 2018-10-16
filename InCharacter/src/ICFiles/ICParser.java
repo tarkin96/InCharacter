@@ -5,6 +5,20 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class ICParser {
+
+    private static ICParser instance = null;
+
+    private ICParser() {
+
+    }
+
+    public static ICParser getInstance() {
+        if (instance == null) {
+            instance = new ICParser();
+        }
+        return instance;
+    }
+
     //creates an ICFile from a file path
     public ICFile parse(String file_path) {
 
