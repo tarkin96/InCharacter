@@ -46,6 +46,10 @@ public class ICParser {
                     }
                     //check if line has no sub attrs
                     else if (line.substring(line.length() - 1).equals(";")) {
+                        //check if line is a function
+                        if (line.substring(0, line.indexOf("=")).contains("()")) {
+
+                        }
                         //check if line has a value
                         if (isNumeric(line.substring(line.indexOf("=") + 1, line.length() - 1))) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
@@ -56,10 +60,10 @@ public class ICParser {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
                             addDescToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("\""), full_line.lastIndexOf("\"") + 1));
                         }
-                        //check if line has a function
+                        //check if line has an expression
                         else if(!line.equals(";")) {
                             String nameOfAttr = line.substring(0, line.lastIndexOf("="));
-                            addFunToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("=") + 1, full_line.lastIndexOf(";")));
+                            addExprToICFile(icfile, nameOfAttr, full_line.substring(full_line.indexOf("=") + 1, full_line.lastIndexOf(";")));
                         }
                         else {System.out.println("something is wrong");}
 
@@ -103,8 +107,9 @@ public class ICParser {
         //System.out.println("added stuff");
     }
 
-    public void addFunToICFile(ICFile file, String name, String fun) {
-        file.addEq(name, fun);
+    //method to add an expression
+    public void addExprToICFile(ICFile file, String name, String expr) {
+        file.addExpr(name, expr);
         //System.out.println("added stuff");
     }
 
@@ -127,10 +132,10 @@ public class ICParser {
         }
     }
 
-    public String findFunct(Attribute icfile, String name) {
+    public String findExpression(Attribute icfile, String name) {
         //find equation in current attribute
-        if(icfile.getFunctions().get(name) != null) {
-            return icfile.getFunctions().get(name);
+        if(icfile.getExpressions().get(name) != null) {
+            return icfile.getExpressions().get(name);
         }
         else {
             return null;

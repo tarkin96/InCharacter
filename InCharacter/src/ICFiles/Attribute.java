@@ -7,6 +7,7 @@ public class Attribute {
     private ArrayList<Attribute> subAttrs;
     private Map<String, String> descriptions;
     private Map<String, Float> values;
+    private Map<String, String> expressions;
     private Map<String, String> functions;
     private ArrayList<String> mappings;
     private Attribute parentAttr;
@@ -16,6 +17,7 @@ public class Attribute {
     public Attribute() {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new HashMap<String, String>();
+        expressions = new HashMap<String, String>();
         functions = new HashMap<String, String>();
         values = new HashMap<String, Float>();
         mappings = new ArrayList<String>();
@@ -26,6 +28,7 @@ public class Attribute {
     public Attribute(String text) {
         subAttrs = new ArrayList<Attribute>();
         descriptions = new HashMap<String, String>();
+        expressions = new HashMap<String, String>();
         functions = new HashMap<String, String>();
         values = new HashMap<String, Float>();
         mappings = new ArrayList<String>();
@@ -37,6 +40,7 @@ public class Attribute {
     protected Attribute(Attribute other) {
 
         descriptions = new HashMap<String, String>();
+        expressions = new HashMap<String, String>();
         functions = new HashMap<String, String>();
         values = new HashMap<String, Float>();
         subAttrs = new ArrayList<Attribute>();
@@ -51,6 +55,10 @@ public class Attribute {
             else if (other.getDescriptions().containsKey(other.getMappings().get(i))) {
                 addDescription(other.getMappings().get(i), other.getDescriptions().get(other.getMappings().get(i)));
                 //System.out.println(mappings.get(i) + " = " + descriptions.get(mappings.get(i)).getValue() + ";");
+            }
+            else if (other.getExpressions().containsKey(other.getMappings().get(i))) {
+                addExpression(other.getMappings().get(i), other.getExpressions().get(other.getMappings().get(i)));
+                //System.out.println(mappings.get(i) + " = " + functions.get(mappings.get(i)).getValue() + ";");
             }
             else if (other.getFunctions().containsKey(other.getMappings().get(i))) {
                 addFunction(other.getMappings().get(i), other.getFunctions().get(other.getMappings().get(i)));
@@ -88,6 +96,20 @@ public class Attribute {
         }
     }
 
+    public void addExpression(String identifier, String expr) {
+        if (!mappings.contains(identifier)) {
+            //itemNumber++;
+            expressions.put(identifier, expr);
+            addMapping(identifier);
+            //System.out.println("hmph " + functions.size());
+            //System.out.println(identifier + " = " + desc);
+        }
+        else {
+            System.out.println("This equation already exists");
+            expressions.put(identifier, expr);
+        }
+    }
+
     public void addFunction(String identifier, String fun) {
         if (!mappings.contains(identifier)) {
             //itemNumber++;
@@ -97,7 +119,7 @@ public class Attribute {
             //System.out.println(identifier + " = " + desc);
         }
         else {
-            System.out.println("This equation already exists");
+            System.out.println("This function already exists");
             functions.put(identifier, fun);
         }
     }
@@ -137,6 +159,10 @@ public class Attribute {
 
     public Map<String, String> getDescriptions() {
         return descriptions;
+    }
+
+    public Map<String, String> getExpressions() {
+        return expressions;
     }
 
     public Map<String, String> getFunctions() {
@@ -189,6 +215,9 @@ public class Attribute {
             else if (descriptions.containsKey(mappings.get(i))) {
                 System.out.println(mappings.get(i) + " = " + descriptions.get(mappings.get(i)) + ";");
             }
+            else if (expressions.containsKey(mappings.get(i))) {
+                System.out.println(mappings.get(i) + " = " + expressions.get(mappings.get(i)) + ";");
+            }
             else if (functions.containsKey(mappings.get(i))) {
                 System.out.println(mappings.get(i) + " = " + functions.get(mappings.get(i)) + ";");
             }
@@ -212,6 +241,9 @@ public class Attribute {
         descriptions.remove(key);
     }
 
+    public void removeExpression(String key) {
+        expressions.remove(key);
+    }
     public void removeFunction(String key) {
         functions.remove(key);
     }
@@ -219,146 +251,4 @@ public class Attribute {
         subAttrs.remove(mappings.indexOf(key));
     }
 
-    /*public void print() {
-
-        //System.out.println("functions: " + functions.size());
-
-        int count = 1, subCount=0, valCount = 0, eqCount = 0, descCount = 0;
-
-        Iterator<Map.Entry<String, Pair<Integer, Float>>> valit = values.entrySet().iterator();
-        Map.Entry<String, Pair<Integer, Float>> value = null;
-        if (values.size() != 0) {
-            value = valit.next();
-        }
-
-        Iterator<Map.Entry<String, Pair<Integer, String>>> descit = descriptions.entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> desc = null;
-        if (descriptions.size() != 0) {
-            desc = descit.next();
-        }
-
-        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = functions.entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> fun = null;
-        if (functions.size() != 0) {
-            fun = funit.next();
-        }
-
-        while (count <= itemNumber) {
-            //System.out.println("Size: " + values.size() + " itemnum = " + desc.getValue().getKey() + " count = " + count);
-            if (values.size() != 0 && value.getValue().getKey() == count) {
-                //System.out.println("found val");
-                count++;
-                valCount++;
-                System.out.println(value.getKey() + " = " + value.getValue().getValue() + ";");
-                if (valit.hasNext()) {
-                    value = valit.next();
-                }
-
-            }
-            else if (descriptions.size() != 0 && desc.getValue().getKey() == count) {
-                //System.out.println("found desc");
-                count++;
-                descCount++;
-                System.out.println(desc.getKey() + " = " + desc.getValue().getValue() + ";");
-                if (descit.hasNext()) {
-                    desc = descit.next();
-                }
-
-            }
-            else if (functions.size() != 0 && fun.getValue().getKey() == count) {
-                //System.out.println("found desc");
-                count++;
-                eqCount++;
-                System.out.println(fun.getKey() + " = " + fun.getValue().getValue() + ";");
-                if (funit.hasNext()) {
-                    fun = funit.next();
-                }
-
-            }
-            else if (subAttrs.size() != 0 && subAttrs.size() > subCount) {
-                //System.out.println("found sub");
-                System.out.println(subAttrs.get(subCount).name + " =");
-                subAttrs.get(subCount).print();
-                System.out.println(";");
-                count++;
-                subCount++;
-
-            }
-            else {System.out.println("Something bad happened!"); count++;}
-        }
-    }*/
-
-
-
-    //perform deep copy of attribute
-    /*protected Attribute(Attribute other) {
-        descriptions = new LinkedHashMap<String, Pair<Integer, String>>();
-        functions = new LinkedHashMap<String, Pair<Integer, String>>();
-        values = new LinkedHashMap<String, Pair<Integer, Float>>();
-        subAttrs = new ArrayList<Attribute>();
-        mappings = new ArrayList<String>();
-        name = other.getName();
-
-        int count = 1, subCount=0, valCount = 0, funCount = 0, descCount = 0;
-
-        Iterator<Map.Entry<String, Pair<Integer, Float>>> valit = other.getValues().entrySet().iterator();
-        Map.Entry<String, Pair<Integer, Float>> value = null;
-        if (other.getValues().size() != 0) {
-            value = valit.next();
-        }
-
-        Iterator<Map.Entry<String, Pair<Integer, String>>> descit = other.getDescriptions().entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> desc = null;
-        if (other.getDescriptions().size() != 0) {
-            desc = descit.next();
-        }
-
-        Iterator<Map.Entry<String, Pair<Integer, String>>> funit = other.getFunctions().entrySet().iterator();
-        Map.Entry<String, Pair<Integer, String>> fun = null;
-        if (other.getFunctions().size() != 0) {
-            fun = funit.next();
-        }
-
-        while (count <= other.getItemNumber()) {
-            if (other.getValues().size() != 0 && value.getValue().getKey() == count) {
-                count++;
-                valCount++;
-                //copy value element
-                addValue(value.getKey(), value.getValue().getValue());
-                if (valit.hasNext()) {
-                    value = valit.next();
-                }
-
-            }
-            else if (other.getDescriptions().size() != 0 && desc.getValue().getKey() == count) {
-                count++;
-                descCount++;
-                //copy description element
-                addDescription(desc.getKey(), desc.getValue().getValue());
-                if (descit.hasNext()) {
-                    desc = descit.next();
-                }
-
-            }
-            else if (other.getFunctions().size() != 0 && fun.getValue().getKey() == count) {
-                count++;
-                funCount++;
-                //copy function element
-                addFunction(fun.getKey(), fun.getValue().getValue());
-
-                if (funit.hasNext()) {
-                    fun = funit.next();
-                }
-
-            }
-            else if (other.getSubAttrs().size() != 0 && other.getSubAttrs().size() > subCount) {
-                //copy subattr element
-                addSubAttr(other.getSubAttrs().get(subCount).copy());
-                count++;
-                subCount++;
-
-            }
-            else {System.out.println("Something bad happened!"); count++;}
-        }
-    }*/
 }

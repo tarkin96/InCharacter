@@ -48,9 +48,14 @@ public class ICFile {
         data.addDescription(name, desc);
     }
 
-    //add an equation
-    public void addEq(String name, String eq) {
-        data.addFunction(name, eq);
+    //add an expression
+    public void addExpr(String name, String expr) {
+        data.addExpression(name, expr);
+    }
+
+    //add a function
+    public void addFun(String name, String fun) {
+        data.addExpression(name, fun);
     }
 
     //sets current Attribute to the parent attribute

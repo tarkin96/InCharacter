@@ -17,14 +17,20 @@ public class Interpreter {
     private static Interpreter instance = null;
 
 
-    public static Interpreter getInstance()
-    {
+    /*
+
+
+    These methods are used to get the interpretation going.
+
+
+     */
+
+    public static Interpreter getInstance() {
         if (instance == null)
             instance = new Interpreter();
 
         return instance;
     }
-
 
     private Interpreter() {
         reserved_file = "";
@@ -55,33 +61,49 @@ public class Interpreter {
         return newAttr;
     }
 
-    //goes through all functions and tries to resolve them
+    //goes through all expressions and tries to resolve them
     private void recInterpret(Attribute attr) {
         for (int i = 0; i < attr.getMappings().size(); i++) {
-            if (attr.getFunctions().containsKey(attr.getMappings().get(i))) {
-                resolve(attr, attr.getMappings().get(i), attr.getFunctions().get(attr.getMappings().get(i)));
+            if (attr.getExpressions().containsKey(attr.getMappings().get(i))) {
+                resolve(attr, attr.getMappings().get(i), attr.getExpressions().get(attr.getMappings().get(i)));
             }
         }
+        //recursively interpret sub attributes
         for (int i = 0; i < attr.getSubAttrs().size(); i++) {
             recInterpret(attr.getSubAttrs().get(i));
         }
     }
 
-    //interprets an entire line and returns resolved value
-    private String resolve(Attribute attr, String key, String funct) {
-        //System.out.println("made it!");
-        ArrayList<String> parts = getStringParts(funct);
-        //scan for equations or values
+
+    /*
+
+
+
+    This is the main bulk and main methods used for interpretation. They
+    do most of the work.
+
+
+
+    */
+
+
+
+    //resolves an entire expression and returns resolved value
+    private String resolve(Attribute attr, String key, String expr) {
+        ArrayList<String> parts = getStringParts(expr);
+        //scans for variables
         for (int i = 0; i < parts.size(); i++) {
             //interpret all the variables in the line first
-            if (!isNumeric(parts.get(i)) && !isReserved(parts.get(i))) {
+            /*if (!isNumeric(parts.get(i)) && !isReserved(parts.get(i))) {
                 //resolve recursively
                 //if it references sub attribute
                 parts.set(i, interpret_var(attr, parts.get(i)));
-            }
-            //begin interpretting whole line
+            }*/
 
         }
+
+        //begin interpretting whole line
+
 
         //placeholder for actual resolve of item
         String retStr = new String();
@@ -95,19 +117,19 @@ public class Interpreter {
         if (isNumeric(retStr)) {
             attr.addValue(key, Float.parseFloat(retStr));
         }
-        else if (retStr.contains("\"")) {
+        else if (isDescription(retStr)) {
             attr.addDescription(key, retStr);
         }
         else {
             System.out.println("Something went wrong with resolving function!");
         }
         //remove function from function map
-        attr.removeFunction(key);
+        attr.removeExpression(key);
         return retStr;
     }
 
 
-
+    //how to interpret variables
     private String interpret_var(Attribute attr, String variable) {
         ICParser parser = ICParser.getInstance();
         //String whatsleft = variable;
@@ -120,7 +142,7 @@ public class Interpreter {
             Float check_val = parser.findVal(attr, variable);
 
             String check_desc = null;
-            String check_func = null;
+            String check_expr = null;
             if (check_val == null) {
                 check_desc = parser.findDescription(attr, variable);
             }
@@ -128,25 +150,44 @@ public class Interpreter {
                 return check_val.toString();
             }
             if (check_desc == null) {
-                check_func = parser.findFunct(attr, variable);
+                check_expr = parser.findExpression(attr, variable);
 
             }
             else {
                 return check_desc;
             }
-            if (check_func == null) {
+            if (check_expr == null) {
                 return null;
             }
             else {
                 //resolve the new function in the attribute
-                check_func = resolve(attr, variable, check_func);
-                return check_func;
+                check_expr = resolve(attr, variable, check_expr);
+                return check_expr;
             }
 
         }
         //return "";
     }
 
+
+
+
+
+
+
+
+    /*
+
+
+    These are some helper methods.
+
+
+     */
+
+
+
+
+    //parses line into tokens (words and symbols)
     private ArrayList<String> getStringParts(String funct) {
         ArrayList<String> parts = new ArrayList<String>();
         if (funct.equals("")) {return parts;}
@@ -204,15 +245,25 @@ public class Interpreter {
         return parts;
     }
 
+
+    //methods to help determine if a string is of a certain type
     private boolean isReserved(String str) {
         return reserved_symbols.contains(str);
     }
 
-
-
-
     private boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    private boolean isDescription(String str) {
+        if (str == null || str.equals("") ) {
+            return false;
+        }
+        if (str.substring(0, 1).equals("\"") && str.substring(str.length() - 1, str.length()).equals("\"")) {
+            return true;
+        }
+        else {return false;}
+
     }
 
 }
