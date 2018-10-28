@@ -5,10 +5,7 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Interpreter {
 
@@ -65,7 +62,8 @@ public class Interpreter {
     private void recInterpret(Attribute attr) {
         for (int i = 0; i < attr.getMappings().size(); i++) {
             if (attr.getExpressions().containsKey(attr.getMappings().get(i))) {
-                resolve(attr, attr.getMappings().get(i), attr.getExpressions().get(attr.getMappings().get(i)));
+                String resStr = resolve(attr, attr.getMappings().get(i), attr.getExpressions().get(attr.getMappings().get(i)));
+                addResolve(attr, attr.getMappings().get(i), resStr);
             }
         }
         //recursively interpret sub attributes
@@ -91,14 +89,35 @@ public class Interpreter {
     //resolves an entire expression and returns resolved value
     private String resolve(Attribute attr, String key, String expr) {
         ArrayList<String> parts = getStringParts(expr);
+
         //scans for variables
         for (int i = 0; i < parts.size(); i++) {
-            //interpret all the variables in the line first
-            /*if (!isNumeric(parts.get(i)) && !isReserved(parts.get(i))) {
-                //resolve recursively
-                //if it references sub attribute
+            //if it's a method, do something for that method
+            if (isReserved(parts.get(i))) {
+
+                if (parts.get(i).equals(":")) {System.out.println("Found reserved item!");
+                    //if right side of expression is another expression
+                    if (isReserved(parts.get(i+1))) {
+                        String newExpr = makeExpression(parts, i + 1, findNextExpression(parts, i + 1));
+                        parts.subList(i+1, findNextExpression(parts, i+ 1) + 1).clear();
+                        parts.add(i + 1, resolve(attr, key, newExpr));
+                        String result = do_range(parts.get(i - 1), parts.get(i+1));
+                        parts.subList(i, i + 1).clear();
+                        parts.set(i - 1, result);
+                    }
+                    else {
+                        String result = do_range(parts.get(i-1), parts.get(i+1));
+                        parts.remove(i+1); parts.remove(i);
+                        parts.set(i - 1, result);
+                    }
+                }
+            }
+            //if it's a varirable
+            else if (!isNumeric((parts.get(i))) && !isDescription(parts.get(i))) {
                 parts.set(i, interpret_var(attr, parts.get(i)));
-            }*/
+            }
+            //moves to next token if it's a value or description
+
 
         }
 
@@ -111,10 +130,11 @@ public class Interpreter {
             retStr+=parts.get(j);
         }
 
+        System.out.println("Expression resulted as: " + retStr);
         //resolve parts as a whole
 
         //place new object into appropriate map
-        if (isNumeric(retStr)) {
+        /*if (isNumeric(retStr)) {
             attr.addValue(key, Float.parseFloat(retStr));
         }
         else if (isDescription(retStr)) {
@@ -124,7 +144,7 @@ public class Interpreter {
             System.out.println("Something went wrong with resolving function!");
         }
         //remove function from function map
-        attr.removeExpression(key);
+        attr.removeExpression(key);*/
         return retStr;
     }
 
@@ -169,7 +189,27 @@ public class Interpreter {
         //return "";
     }
 
+    //interpret if statement
+    private String do_if(ArrayList<String> statement) {
+        return "true";
+    }
 
+    //interpret range (ex. 4:6)
+    private String do_range(String first, String second) {
+        if (!isInteger(first) && !isInteger(second)) {
+            return "null";
+        }
+        Random rand = new Random();
+        int first_val = Integer.parseInt(first);
+        int second_val = Integer.parseInt(second);
+
+        if (first_val <= second_val) {
+            return Integer.toString(rand.nextInt(second_val - first_val) + first_val) ;
+        }
+        else {
+            return Integer.toString(rand.nextInt(first_val - second_val) + second_val) ;
+        }
+    }
 
 
 
@@ -264,6 +304,62 @@ public class Interpreter {
         }
         else {return false;}
 
+    }
+
+    private boolean isInteger(String str) { return str.matches("-?\\d+"); }
+
+    private int findNextExpression(ArrayList<String> tokens, int start_index) {
+        //search inside set of parenthesis
+        if (tokens.get(start_index).equals("(")) {
+            int levels = 1;
+            int i = start_index + 1;
+            while (levels != 0 && i < tokens.size()) {
+                if (tokens.get(i).equals(")")) {
+                    levels--;
+                }
+                else if (tokens.get(i).equals("(")) {
+                    levels++;
+                }
+                i++;
+            }
+            if (levels != 0) {
+                return -1; //ERROR!!!!!!
+            }
+            return i;
+
+        }
+        //search for end of if statement
+        else if (tokens.get(start_index).equals("if")) {
+
+        }
+        return -1; //ERROR!!!!
+
+    }
+
+    private String makeExpression(ArrayList<String> tokens, int begin, int end) {
+        if (end >= tokens.size()) {
+            return "null";
+        }
+        String retStr = new String();
+        for (int i = begin; i <= end; i++) {
+            retStr = retStr + " " + tokens.get(i);
+        }
+        return retStr;
+    }
+
+    private void addResolve(Attribute attr, String key, String retStr) {
+        //place new object into appropriate map
+        if (isNumeric(retStr)) {
+            attr.addValue(key, Float.parseFloat(retStr));
+        }
+        else if (isDescription(retStr)) {
+            attr.addDescription(key, retStr);
+        }
+        else {
+            System.out.println("Something went wrong with resolving function!");
+        }
+        //remove function from function map
+        attr.removeExpression(key);
     }
 
 }
