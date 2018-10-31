@@ -10,7 +10,7 @@ import java.util.*;
 public class Interpreter {
 
     private ArrayList<String> reserved_symbols;
-    private String reserved_file;
+    private ArrayList<String> reserved_words;
     private static Interpreter instance = null;
 
 
@@ -30,19 +30,25 @@ public class Interpreter {
     }
 
     private Interpreter() {
-        reserved_file = "";
         reserved_symbols = new ArrayList<String>();
+        reserved_words = new ArrayList<String>();
     }
 
-    public void init(String filename) {
-        reserved_file = filename;
+    public void init(String filepath) {
+        String reserved_words_path = filepath + "reserved_words.txt";
+        String reserved_symbols_path = filepath + "reserved_symbols.txt";
 
         //get all reserved words from configuration
-        File file = new File(filename);
+        File symbols_file = new File(reserved_symbols_path);
+        File words_file = new File(reserved_words_path);
         try {
-            Scanner scan = new Scanner(file);
+            Scanner scan = new Scanner(symbols_file);
             while (scan.hasNextLine()) {
                 reserved_symbols.add(scan.nextLine());
+            }
+            scan = new Scanner(words_file);
+            while (scan.hasNextLine()) {
+                reserved_words.add(scan.nextLine());
             }
         }
         catch (IOException e) {
@@ -62,7 +68,7 @@ public class Interpreter {
     private void recInterpret(Attribute attr) {
         for (int i = 0; i < attr.getMappings().size(); i++) {
             if (attr.getExpressions().containsKey(attr.getMappings().get(i))) {
-                String resStr = resolve(attr, attr.getMappings().get(i), attr.getExpressions().get(attr.getMappings().get(i)));
+                String resStr = resolve(attr, attr.getExpressions().get(attr.getMappings().get(i)));
                 addResolve(attr, attr.getMappings().get(i), resStr);
             }
         }
@@ -87,34 +93,24 @@ public class Interpreter {
 
 
     //resolves an entire expression and returns resolved value
-    private String resolve(Attribute attr, String key, String expr) {
-        ArrayList<String> parts = getStringParts(expr);
+    private String resolve(Attribute attr, String expr) {
+        ArrayList<String> tokens = getStringParts(expr);
 
         //scans for variables
-        for (int i = 0; i < parts.size(); i++) {
+        for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
-            if (isReserved(parts.get(i))) {
-
-                if (parts.get(i).equals(":")) {System.out.println("Found reserved item!");
-                    //if right side of expression is another expression
-                    if (isReserved(parts.get(i+1))) {
-                        String newExpr = makeExpression(parts, i + 1, findNextExpression(parts, i + 1));
-                        parts.subList(i+1, findNextExpression(parts, i+ 1) + 1).clear();
-                        parts.add(i + 1, resolve(attr, key, newExpr));
-                        String result = do_range(parts.get(i - 1), parts.get(i+1));
-                        parts.subList(i, i + 1).clear();
-                        parts.set(i - 1, result);
-                    }
-                    else {
-                        String result = do_range(parts.get(i-1), parts.get(i+1));
-                        parts.remove(i+1); parts.remove(i);
-                        parts.set(i - 1, result);
-                    }
+            if (isReserved(tokens.get(i))) {
+                if (tokens.get(i).equals(":")) {System.out.println("Found reserved item!");
+                    resolve_Range(attr, tokens, i);
                 }
+                else if (false) {
+
+                }
+                else {System.out.println("Reserved token not implemented yet!");}
             }
             //if it's a varirable
-            else if (!isNumeric((parts.get(i))) && !isDescription(parts.get(i))) {
-                parts.set(i, interpret_var(attr, parts.get(i)));
+            else if (!isNumeric((tokens.get(i))) && !isDescription(tokens.get(i))) {
+                tokens.set(i, interpret_var(attr, tokens.get(i)));
             }
             //moves to next token if it's a value or description
 
@@ -126,25 +122,13 @@ public class Interpreter {
 
         //placeholder for actual resolve of item
         String retStr = new String();
-        for (int j = 0; j < parts.size(); j++) {
-            retStr+=parts.get(j);
+        for (int j = 0; j < tokens.size(); j++) {
+            retStr+=tokens.get(j);
         }
 
         System.out.println("Expression resulted as: " + retStr);
         //resolve parts as a whole
 
-        //place new object into appropriate map
-        /*if (isNumeric(retStr)) {
-            attr.addValue(key, Float.parseFloat(retStr));
-        }
-        else if (isDescription(retStr)) {
-            attr.addDescription(key, retStr);
-        }
-        else {
-            System.out.println("Something went wrong with resolving function!");
-        }
-        //remove function from function map
-        attr.removeExpression(key);*/
         return retStr;
     }
 
@@ -181,7 +165,7 @@ public class Interpreter {
             }
             else {
                 //resolve the new function in the attribute
-                check_expr = resolve(attr, variable, check_expr);
+                check_expr = resolve(attr, check_expr);
                 return check_expr;
             }
 
@@ -192,6 +176,25 @@ public class Interpreter {
     //interpret if statement
     private String do_if(ArrayList<String> statement) {
         return "true";
+    }
+
+    //resolves the range method and changes the tokens arrayList
+    private void resolve_Range(Attribute attr, ArrayList<String> tokens, int rangeIndex) {
+        //if right side of expression is another expression
+        if (isReserved(tokens.get(rangeIndex+1))) {
+            String newExpr = makeExpression(tokens, rangeIndex + 1, findNextExpression(tokens, rangeIndex + 1));
+            tokens.subList(rangeIndex+1, findNextExpression(tokens, rangeIndex + 1) + 1).clear();
+            tokens.add(rangeIndex + 1, resolve(attr, newExpr));
+            String result = do_range(tokens.get(rangeIndex - 1), tokens.get(rangeIndex+1));
+            tokens.subList(rangeIndex, rangeIndex + 1).clear();
+            tokens.set(rangeIndex - 1, result);
+        }
+        else {
+            String result = do_range(tokens.get(rangeIndex-1), tokens.get(rangeIndex+1));
+            tokens.remove(rangeIndex+1); tokens.remove(rangeIndex);
+            tokens.set(rangeIndex - 1, result);
+        }
+
     }
 
     //interpret range (ex. 4:6)
@@ -216,6 +219,8 @@ public class Interpreter {
 
 
 
+
+
     /*
 
 
@@ -229,71 +234,129 @@ public class Interpreter {
 
     //parses line into tokens (words and symbols)
     private ArrayList<String> getStringParts(String funct) {
-        ArrayList<String> parts = new ArrayList<String>();
-        if (funct.equals("")) {return parts;}
+        ArrayList<String> tokens = new ArrayList<String>();
+        if (funct.length() == 0) {return tokens;}
         int count = 0;
-        int look_back = 0;
+        int lookback = 0;
 
-        while (count < funct.length()) {
-            //if window is empty space
-            if(funct.substring(look_back, count+1).trim().length() == 0) {
-                //System.out.println("Emtpy Space");
-                count++;
+        while (count <= funct.length()) {
+            //if at end of string
+            if (count == funct.length()) {
+               //if lookback points to a character
+                if (funct.substring(lookback, lookback + 1).trim().length() != 0) {
+                    //add rest of the token
+                    tokens.add(funct.substring(lookback, count));
+                    return tokens;
+                }
             }
-            //window contains other characters
             else {
-                //if current character is reserved
-                if(isReserved(funct.substring(count, count + 1))) {
-                    //System.out.println("Reserved Character");
-                    //check to add previous characters to parts list
-                    if (!(funct.substring(look_back, look_back+1).trim().length() == 0)) {
-                        parts.add(funct.substring(look_back, count));
-                    }
-                    //add reserved character to list
-                    parts.add(funct.substring(count, count+1));
-                    //move look back to count
+                //if window is empty space
+                if(funct.substring(lookback, count+1).trim().length() == 0) {
+                    //System.out.println("Emtpy Space");
                     count++;
-                    look_back = count;
                 }
+                //window contains characters
                 else {
-                    //if look back is white space (found a new word) or a reserved character
-                    if (funct.substring(look_back, look_back + 1).trim().length() == 0 || isReserved(funct.substring(look_back, look_back + 1))) {
-                        //System.out.println("Found word at " + count);
-                        look_back = count;
+                    //if start of window is white space (found new set of words or symbols)
+                    if (funct.substring(lookback, lookback+1).trim().length() == 0) {
+                        //set window to current character
+                        lookback = count;
                     }
-                    //if look back is a character
-                    else {
-                        //if count is whitespace (found end of word)
-                        if (funct.substring(count, count+ 1).trim().length() == 0) {
-                            parts.add(funct.substring(look_back, count));
-                            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
-                            look_back = count;
+                    //check if current window is a reserved symbol
+                    if (isReservedSymbol(funct.substring(lookback, count + 1))) {
+                        //check if it is unambiguous
+                        if (!isAmbiguous(funct.substring(lookback, count + 1))) {
+                            //add it to tokens
+                            tokens.add(funct.substring(lookback, count + 1));
+                            //move to next character
+                            count++;
+                            lookback = count;
                         }
-
+                        //if ambiguous
+                        else {
+                            String newStr = lookAhead(funct, count, lookback);
+                            tokens.add(newStr);
+                            lookback = lookback + newStr.length();
+                            count = lookback;
+                        }
                     }
-                    count++;
+                    //if new character is whitespace (found end of word or symbol)
+                    else if (funct.substring(count, count + 1).trim().length() == 0) {
+                        //add word to tokens
+                        tokens.add(funct.substring(lookback, count));
+                        //set to scan for new words
+                        lookback = count;
+                        count++;
+                    }
                 }
             }
-        }
-        //add last word of line
-        if (!(funct.substring(look_back, look_back + 1).trim().length() == 0)) {
-            parts.add(funct.substring(look_back, count));
-            //System.out.println("End of word: lookback = " + look_back + " count = " + count);
-            look_back = count;
+
         }
 
-        return parts;
+        return tokens;
+    }
+
+    private String lookAhead(String str, int count, int lookback) {
+        int addon = 0;
+        String possible = new String();
+        //possible = str.substring(lookback, count + 1);
+        //look ahead until we reach the end, become unambiguous (have 1 or 0 options), or reach whitespace
+        while ((count + addon  <= str.length() - 1) && hasPossibleMatch(str.substring(lookback, count + 1 + addon))
+                && (str.substring(count + addon, count + addon + 1 ).trim().length() != 0)) {
+            if (isReservedSymbol(str.substring(lookback, count + addon + 1))) {
+                possible = str.substring(lookback, count + addon + 1 );
+            }
+            addon++;
+        }
+
+        //if our window is a reserved symbol
+        return possible;
     }
 
 
     //methods to help determine if a string is of a certain type
     private boolean isReserved(String str) {
+        return (reserved_symbols.contains(str) || reserved_words.contains(str));
+    }
+
+    private boolean isReservedSymbol(String str) {
         return reserved_symbols.contains(str);
+    }
+
+    private boolean isReservedWord(String str) {
+        return reserved_words.contains(str);
     }
 
     private boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?");
     }
+
+    //checks if there are more than 1 possible symbols left
+    private boolean isAmbiguous(String str) {
+        int match_count = 0;
+        for (int i = 0; i < reserved_symbols.size(); i++) {
+            //if symbol is possible
+            if (reserved_symbols.get(i).substring(0, str.length()).equals(str)) {
+                match_count++;
+            }
+            if (match_count > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //checks to see if a symbol starts with the input string
+    private boolean hasPossibleMatch(String str) {
+        for (int i = 0; i < reserved_symbols.size(); i++) {
+            //if there is a possible match
+            if (reserved_symbols.get(i).substring(0, str.length()).equals(str)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private boolean isDescription(String str) {
         if (str == null || str.equals("") ) {

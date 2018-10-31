@@ -31,7 +31,7 @@ public class InCharacter {
         if(!Config()) {
             return;
         }
-        interpreter.init(ICFilePath + configPath + "reserved_words.txt");
+        interpreter.init(ICFilePath + configPath);
 
         ICFile icfile = parser.parse("C:\\Users\\jwk\\Desktop\\InCharacter\\InCharacter\\Data\\Rule Sets\\WadeRules\\Base.txt");
 
