@@ -100,7 +100,7 @@ public class Interpreter {
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
             if (isReserved(tokens.get(i))) {
-                if (tokens.get(i).equals(":")) {System.out.println("Found reserved item! " + tokens.get(i) );
+                if (tokens.get(i).equals(":")) {
                     resolve_Range(attr, tokens, i);
                 }
                 else if (false) {
@@ -126,7 +126,6 @@ public class Interpreter {
             retStr+=tokens.get(j);
         }
 
-        System.out.println("Expression resulted as: " + retStr);
         //resolve parts as a whole
 
         return retStr;
@@ -287,7 +286,7 @@ public class Interpreter {
                         }
 
                     }
-                    
+
                     //if new character is whitespace (found end of word or symbol)
                     else if (funct.substring(count, count + 1).trim().length() == 0) {
 
@@ -310,7 +309,6 @@ public class Interpreter {
     private String lookAhead(String str, int count, int lookback) {
         int addon = 0;
         String possible = new String();
-        //possible = str.substring(lookback, count + 1);
         //look ahead until we reach the end, can't possibly be matched, or reach whitespace
         while ((count + addon  <= str.length() - 1) && hasPossibleMatch(str.substring(lookback, count + 1 + addon))
                 && (str.substring(count + addon, count + addon + 1 ).trim().length() != 0)) {

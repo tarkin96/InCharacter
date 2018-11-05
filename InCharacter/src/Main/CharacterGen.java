@@ -11,7 +11,7 @@ public class CharacterGen {
 
         //fulfill character
         character.interpret();
-        //character.print();
+        character.print();
         return character;
     }
 

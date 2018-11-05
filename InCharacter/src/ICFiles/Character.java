@@ -13,8 +13,8 @@ public class Character {
     }
 
     public void print() {
-        System.out.println("Character's Base Data");
-        base_data.print();
+        //System.out.println("Character's Base Data");
+        //base_data.print();
         System.out.println("\nCharacter's Data");
         data.print();
     }
@@ -24,6 +24,6 @@ public class Character {
         data = inter.interpret(base_data);
 
 
-        print();
+        //print();
     }
 }

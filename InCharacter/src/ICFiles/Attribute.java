@@ -91,7 +91,7 @@ public class Attribute {
             //System.out.println(identifier + " = " + desc);
         }
         else {
-            System.out.println("This description already exists");
+            //System.out.println("This description already exists");
             descriptions.put(identifier, desc);
         }
     }
@@ -105,7 +105,7 @@ public class Attribute {
             //System.out.println(identifier + " = " + desc);
         }
         else {
-            System.out.println("This equation already exists");
+            //System.out.println("This equation already exists");
             expressions.put(identifier, expr);
         }
     }
@@ -119,7 +119,7 @@ public class Attribute {
             //System.out.println(identifier + " = " + desc);
         }
         else {
-            System.out.println("This function already exists");
+            //System.out.println("This function already exists");
             functions.put(identifier, fun);
         }
     }
@@ -132,7 +132,7 @@ public class Attribute {
             //System.out.println(identifier + " = " + val.toString());
         }
         else {
-            System.out.println("This value already exists");
+            //System.out.println("This value already exists");
             values.put(identifier, val);
         }
     }

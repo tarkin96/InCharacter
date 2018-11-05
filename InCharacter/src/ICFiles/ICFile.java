@@ -67,7 +67,6 @@ public class ICFile {
     public void print() {
 
         data.print();
-        System.out.println("life is great!");
     }
 
 
