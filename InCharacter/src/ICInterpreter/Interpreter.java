@@ -100,7 +100,7 @@ public class Interpreter {
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
             if (isReserved(tokens.get(i))) {
-                if (tokens.get(i).equals(":")) {System.out.println("Found reserved item!");
+                if (tokens.get(i).equals(":")) {System.out.println("Found reserved item! " + tokens.get(i) );
                     resolve_Range(attr, tokens, i);
                 }
                 else if (false) {
@@ -248,12 +248,15 @@ public class Interpreter {
                     tokens.add(funct.substring(lookback, count));
                     return tokens;
                 }
+                return tokens;
             }
             else {
+
                 //if window is empty space
                 if(funct.substring(lookback, count+1).trim().length() == 0) {
                     //System.out.println("Emtpy Space");
                     count++;
+
                 }
                 //window contains characters
                 else {
@@ -261,36 +264,44 @@ public class Interpreter {
                     if (funct.substring(lookback, lookback+1).trim().length() == 0) {
                         //set window to current character
                         lookback = count;
+
                     }
-                    //check if current window is a reserved symbol
-                    if (isReservedSymbol(funct.substring(lookback, count + 1))) {
-                        //check if it is unambiguous
-                        if (!isAmbiguous(funct.substring(lookback, count + 1))) {
-                            //add it to tokens
-                            tokens.add(funct.substring(lookback, count + 1));
-                            //move to next character
-                            count++;
+
+                    //check if current character is a part of a symbol
+                    if (hasPossibleMatch(funct.substring(count, count+ 1))) {
+                        //look ahead to see if string contains a symbol
+                        String longestStr = lookAhead(funct, count, count);
+                        //if we find a symbol
+                        if (!longestStr.equals("")) {
+                            //add previous characters as another token
+                            tokens.add(funct.substring(lookback, count));
+                            //add symbol to tokens
+                            tokens.add(longestStr);
+                            //move window
+                            count = count + longestStr.length();
                             lookback = count;
                         }
-                        //if ambiguous
+                        //if we find nothing
                         else {
-                            String newStr = lookAhead(funct, count, lookback);
-                            tokens.add(newStr);
-                            lookback = lookback + newStr.length();
-                            count = lookback;
+                            count++;
                         }
+
                     }
+                    
                     //if new character is whitespace (found end of word or symbol)
                     else if (funct.substring(count, count + 1).trim().length() == 0) {
+
                         //add word to tokens
                         tokens.add(funct.substring(lookback, count));
                         //set to scan for new words
                         lookback = count;
                         count++;
                     }
+                    else {
+                        count++;
+                    }
                 }
             }
-
         }
 
         return tokens;
@@ -300,7 +311,7 @@ public class Interpreter {
         int addon = 0;
         String possible = new String();
         //possible = str.substring(lookback, count + 1);
-        //look ahead until we reach the end, become unambiguous (have 1 or 0 options), or reach whitespace
+        //look ahead until we reach the end, can't possibly be matched, or reach whitespace
         while ((count + addon  <= str.length() - 1) && hasPossibleMatch(str.substring(lookback, count + 1 + addon))
                 && (str.substring(count + addon, count + addon + 1 ).trim().length() != 0)) {
             if (isReservedSymbol(str.substring(lookback, count + addon + 1))) {
@@ -350,13 +361,25 @@ public class Interpreter {
     private boolean hasPossibleMatch(String str) {
         for (int i = 0; i < reserved_symbols.size(); i++) {
             //if there is a possible match
-            if (reserved_symbols.get(i).substring(0, str.length()).equals(str)) {
+            if (str.length() <= reserved_symbols.get(i).length()) {
+                if (reserved_symbols.get(i).substring(0, str.length()).equals(str)) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
+    private boolean containsReservedSymbol(String str) {
+        for (int i = 0; i < reserved_symbols.size(); i++) {
+            //if there is a possible match
+            if (str.contains(reserved_symbols.get(i))) {
                 return true;
             }
         }
         return false;
     }
-
 
     private boolean isDescription(String str) {
         if (str == null || str.equals("") ) {
@@ -423,6 +446,18 @@ public class Interpreter {
         }
         //remove function from function map
         attr.removeExpression(key);
+    }
+
+    private String getTerminatingSymbol(String str) {
+        String longestMatch = new String();
+        for (int i = 0; i < reserved_symbols.size(); i++) {
+            if (str.contains(reserved_symbols.get(i))) {
+                if (reserved_symbols.get(i).length() > longestMatch.length()) {
+                    longestMatch = reserved_symbols.get(i);
+                }
+            }
+        }
+        return longestMatch;
     }
 
 }
