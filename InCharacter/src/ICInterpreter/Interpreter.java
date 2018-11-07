@@ -103,8 +103,8 @@ public class Interpreter {
                 if (tokens.get(i).equals(":")) {
                     resolve_Range(attr, tokens, i);
                 }
-                else if (false) {
-
+                else if (tokens.get(i).equals("if")) {
+                    resolve_if(attr, tokens, i);
                 }
                 else {System.out.println("Reserved token not implemented yet!");}
             }
@@ -172,15 +172,11 @@ public class Interpreter {
         //return "";
     }
 
-    //interpret if statement
-    private String do_if(ArrayList<String> statement) {
-        return "true";
-    }
-
     //resolves the range method and changes the tokens arrayList
     private void resolve_Range(Attribute attr, ArrayList<String> tokens, int rangeIndex) {
         //if right side of expression is another expression
-        if (isReserved(tokens.get(rangeIndex+1))) {
+        //if (isReserved(tokens.get(rangeIndex+1))) {
+        if (!isNumeric(tokens.get(rangeIndex+1)) && !isDescription(tokens.get(rangeIndex+1))) {
             String newExpr = makeExpression(tokens, rangeIndex + 1, findNextExpression(tokens, rangeIndex + 1));
             tokens.subList(rangeIndex+1, findNextExpression(tokens, rangeIndex + 1) + 1).clear();
             tokens.add(rangeIndex + 1, resolve(attr, newExpr));
@@ -196,7 +192,7 @@ public class Interpreter {
 
     }
 
-    //interpret range (ex. 4:6)
+    //interpret range (ex. 4:6 can return 4,5, or 6)
     private String do_range(String first, String second) {
         if (!isInteger(first) && !isInteger(second)) {
             return "null";
@@ -213,7 +209,37 @@ public class Interpreter {
         }
     }
 
+    //resolves an if statement
+    private void resolve_if(Attribute attr, ArrayList<String> tokens, int ifIndex) {
+        //resolve conditional
+        if (tokens.get(ifIndex+1).equals("(")) {
+            String newExpr = makeExpression(tokens, ifIndex + 1, findNextExpression(tokens, ifIndex + 1));
+            tokens.subList(ifIndex+1, findNextExpression(tokens, ifIndex + 1) + 1).clear();
+            tokens.add(ifIndex + 1, resolve(attr, newExpr));
+            //if if statement conditional resolves as true
+            if (do_if(tokens.get(ifIndex+1)) && tokens.get(ifIndex + 2).equals("{")) {
+                //resolve executable block and replace entire if statement with result
+                String blockExpr = makeExpression(tokens, ifIndex + 2, findNextExpression(tokens, ifIndex + 2));
+                tokens.subList(ifIndex, findNextExpression(tokens, ifIndex + 2) + 1).clear();
+                tokens.add(ifIndex, resolve(attr, blockExpr));
+            }
+            //if resolves as false
+            else {
+                //remove executable block and rest of if statement from tokens
+                tokens.subList(ifIndex, findNextExpression(tokens, ifIndex) + 1).clear();
+            }
 
+        }
+    }
+    //interpret if statement
+    private boolean do_if (String conditional) {
+        if (conditional.equals("true")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
 
 
@@ -411,6 +437,23 @@ public class Interpreter {
             }
             return i;
 
+        }
+        else if (tokens.get(start_index).equals("{")) {
+            int levels = 1;
+            int i = start_index + 1;
+            while (levels != 0 && i < tokens.size()) {
+                if (tokens.get(i).equals("}")) {
+                    levels--;
+                }
+                else if (tokens.get(i).equals("{")) {
+                    levels++;
+                }
+                i++;
+            }
+            if (levels != 0) {
+                return -1; //ERROR!!!!!!
+            }
+            return i;
         }
         //search for end of if statement
         else if (tokens.get(start_index).equals("if")) {
