@@ -95,8 +95,10 @@ public class Interpreter {
     //resolves an entire expression and returns resolved value
     private String resolve(Attribute attr, String expr) {
         ArrayList<String> tokens = getStringParts(expr);
+        /*for (int i = 0; i < tokens.size(); i++) {
+            System.out.println(tokens.get(i));
+        }*/
 
-        //scans for variables
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
             if (isReserved(tokens.get(i))) {
@@ -106,10 +108,25 @@ public class Interpreter {
                 else if (tokens.get(i).equals("if")) {
                     resolve_if(attr, tokens, i);
                 }
+                else if (tokens.get(i).equals("(")) {
+                    resolve_par(attr, tokens, i);
+                }
+                else if(tokens.get(i).equals("{")) {
+                    resolve_block(attr, tokens, i);
+                }
+                else if (tokens.get(i).equals("true")) {
+
+                }
+                else if (tokens.get(i).equals("false")) {
+
+                }
                 else {System.out.println("Reserved token not implemented yet!");}
             }
             //if it's a varirable
             else if (!isNumeric((tokens.get(i))) && !isDescription(tokens.get(i))) {
+                /*if (tokens.get(i).equals("")) {
+                    System.out.println("trying to interpret empty space!");
+                }*/
                 tokens.set(i, interpret_var(attr, tokens.get(i)));
             }
             //moves to next token if it's a value or description
@@ -160,6 +177,7 @@ public class Interpreter {
                 return check_desc;
             }
             if (check_expr == null) {
+                System.out.println("Got null in interpret_var");
                 return null;
             }
             else {
@@ -195,6 +213,7 @@ public class Interpreter {
     //interpret range (ex. 4:6 can return 4,5, or 6)
     private String do_range(String first, String second) {
         if (!isInteger(first) && !isInteger(second)) {
+            System.out.println("Got null in do_range");
             return "null";
         }
         Random rand = new Random();
@@ -226,7 +245,7 @@ public class Interpreter {
             //if resolves as false
             else {
                 //remove executable block and rest of if statement from tokens
-                tokens.subList(ifIndex, findNextExpression(tokens, ifIndex) + 1).clear();
+                tokens.subList(ifIndex, findNextExpression(tokens, ifIndex+2) + 1).clear();
             }
 
         }
@@ -241,7 +260,21 @@ public class Interpreter {
         }
     }
 
+    private void resolve_par(Attribute attr, ArrayList<String> tokens, int parIndex) {
+        //get expression between the parenthesis
+        String insideExpr = makeExpression(tokens, parIndex + 1, findNextExpression(tokens, parIndex) - 1);
+        //clear out expression from tokens and replaces with resolved values
+        tokens.subList(parIndex, findNextExpression(tokens, parIndex) + 1).clear();
+        tokens.add(parIndex, resolve(attr, insideExpr));
+    }
 
+    private void resolve_block(Attribute attr, ArrayList<String> tokens, int blockIndex) {
+        //get expression between the curled brackets
+        String insideExpr = makeExpression(tokens, blockIndex + 1, findNextExpression(tokens, blockIndex) - 1);
+        //clear out expression from tokens and replaces with resolved values
+        tokens.subList(blockIndex, findNextExpression(tokens, blockIndex) + 1).clear();
+        tokens.add(blockIndex, resolve(attr, insideExpr));
+    }
 
 
 
@@ -255,8 +288,6 @@ public class Interpreter {
      */
 
 
-
-
     //parses line into tokens (words and symbols)
     private ArrayList<String> getStringParts(String funct) {
         ArrayList<String> tokens = new ArrayList<String>();
@@ -268,8 +299,9 @@ public class Interpreter {
             //if at end of string
             if (count == funct.length()) {
                //if lookback points to a character
-                if (funct.substring(lookback, lookback + 1).trim().length() != 0) {
+                if (lookback < funct.length() && funct.substring(lookback, lookback + 1).trim().length() != 0) {
                     //add rest of the token
+                    //System.out.println("Adding1: "+ funct.substring(lookback, count));
                     tokens.add(funct.substring(lookback, count));
                     return tokens;
                 }
@@ -298,9 +330,15 @@ public class Interpreter {
                         String longestStr = lookAhead(funct, count, count);
                         //if we find a symbol
                         if (!longestStr.equals("")) {
-                            //add previous characters as another token
-                            tokens.add(funct.substring(lookback, count));
+                            //add previous characters as another token if it exists
+
+                            if (funct.substring(lookback,count).trim().length() != 0) {
+                                //System.out.println("Adding2: "+ funct.substring(lookback, count));
+                                tokens.add(funct.substring(lookback, count));
+                            }
+
                             //add symbol to tokens
+                            //System.out.println("Adding3: "+ longestStr);
                             tokens.add(longestStr);
                             //move window
                             count = count + longestStr.length();
@@ -317,6 +355,7 @@ public class Interpreter {
                     else if (funct.substring(count, count + 1).trim().length() == 0) {
 
                         //add word to tokens
+                        //System.out.println("Adding4: "+ funct.substring(lookback, count));
                         tokens.add(funct.substring(lookback, count));
                         //set to scan for new words
                         lookback = count;
@@ -418,6 +457,7 @@ public class Interpreter {
 
     private boolean isInteger(String str) { return str.matches("-?\\d+"); }
 
+    //returns index of final token of expression
     private int findNextExpression(ArrayList<String> tokens, int start_index) {
         //search inside set of parenthesis
         if (tokens.get(start_index).equals("(")) {
@@ -435,7 +475,7 @@ public class Interpreter {
             if (levels != 0) {
                 return -1; //ERROR!!!!!!
             }
-            return i;
+            return i - 1;
 
         }
         else if (tokens.get(start_index).equals("{")) {
@@ -453,7 +493,7 @@ public class Interpreter {
             if (levels != 0) {
                 return -1; //ERROR!!!!!!
             }
-            return i;
+            return i - 1;
         }
         //search for end of if statement
         else if (tokens.get(start_index).equals("if")) {
@@ -463,8 +503,10 @@ public class Interpreter {
 
     }
 
+    //makes expression from string list that is inclusive to begin and end
     private String makeExpression(ArrayList<String> tokens, int begin, int end) {
         if (end >= tokens.size()) {
+            System.out.println("Got null in makeExpression");
             return "null";
         }
         String retStr = new String();
@@ -478,15 +520,19 @@ public class Interpreter {
         //place new object into appropriate map
         if (isNumeric(retStr)) {
             attr.addValue(key, Float.parseFloat(retStr));
+            attr.removeExpression(key);
         }
         else if (isDescription(retStr)) {
             attr.addDescription(key, retStr);
+            attr.removeExpression(key);
         }
         else {
-            System.out.println("Something went wrong with resolving function!");
+            System.out.println("Replacing expression of key: " + key);
+            System.out.println("With the expression: " + retStr);
+            attr.addExpression(key, retStr);
         }
         //remove function from function map
-        attr.removeExpression(key);
+
     }
 
     private String getTerminatingSymbol(String str) {

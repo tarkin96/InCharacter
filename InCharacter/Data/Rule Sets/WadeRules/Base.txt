@@ -21,6 +21,12 @@ Attributes =
 	Charisma = 12;
 ;
 
+Test_true = true;
+Test_false = false;
+
+test_if = if (Test_false) {4};
+test_if2 = if (Test_true) {3};
+
 Saving_Throws = 
 	Strength = 
 		Value = 0;
