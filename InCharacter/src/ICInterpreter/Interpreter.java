@@ -11,6 +11,7 @@ public class Interpreter {
 
     private ArrayList<String> reserved_symbols;
     private ArrayList<String> reserved_words;
+    private ArrayList<ArrayList<String>> operators;
     private static Interpreter instance = null;
 
 
@@ -32,15 +33,19 @@ public class Interpreter {
     private Interpreter() {
         reserved_symbols = new ArrayList<String>();
         reserved_words = new ArrayList<String>();
+        operators = new ArrayList<ArrayList<String>>();
+        operators.add(new ArrayList<String>());
     }
 
     public void init(String filepath) {
         String reserved_words_path = filepath + "reserved_words.txt";
         String reserved_symbols_path = filepath + "reserved_symbols.txt";
+        String operators_path = filepath + "operators.txt";
 
         //get all reserved words from configuration
         File symbols_file = new File(reserved_symbols_path);
         File words_file = new File(reserved_words_path);
+        File operators_file = new File(operators_path);
         try {
             Scanner scan = new Scanner(symbols_file);
             while (scan.hasNextLine()) {
@@ -49,6 +54,19 @@ public class Interpreter {
             scan = new Scanner(words_file);
             while (scan.hasNextLine()) {
                 reserved_words.add(scan.nextLine());
+            }
+            scan = new Scanner(operators_file);
+            int i = 0;
+            String line=  new String();
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
+                if (line.equals("")) {
+                    i++;
+                    operators.add(new ArrayList<String>());
+                }
+                else {
+                    operators.get(i).add(line);
+                }
             }
         }
         catch (IOException e) {
@@ -102,10 +120,10 @@ public class Interpreter {
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
             if (isReserved(tokens.get(i))) {
-                if (tokens.get(i).equals(":")) {
+                /*if (tokens.get(i).equals(":")) {
                     resolve_Range(attr, tokens, i);
                 }
-                else if (tokens.get(i).equals("if")) {
+                else */if (tokens.get(i).equals("if")) {
                     resolve_if(attr, tokens, i);
                 }
                 else if (tokens.get(i).equals("(")) {
@@ -113,6 +131,9 @@ public class Interpreter {
                 }
                 else if(tokens.get(i).equals("{")) {
                     resolve_block(attr, tokens, i);
+                }
+                else if (isOperator(tokens.get(i))) {
+                    //do math stuff
                 }
                 else if (tokens.get(i).equals("true")) {
 
@@ -266,6 +287,12 @@ public class Interpreter {
         //clear out expression from tokens and replaces with resolved values
         tokens.subList(parIndex, findNextExpression(tokens, parIndex) + 1).clear();
         tokens.add(parIndex, resolve(attr, insideExpr));
+
+        //check if newly completed parenthesis expression is part of a math expression
+        if (parIndex+1 < tokens.size() && (tokens.get(parIndex+1).equals("(") || isNumeric(tokens.get(parIndex+1)))) {
+            //add the multiplication symbol
+            tokens.add(parIndex+1, "*");
+        }
     }
 
     private void resolve_block(Attribute attr, ArrayList<String> tokens, int blockIndex) {
@@ -275,6 +302,50 @@ public class Interpreter {
         tokens.subList(blockIndex, findNextExpression(tokens, blockIndex) + 1).clear();
         tokens.add(blockIndex, resolve(attr, insideExpr));
     }
+
+
+
+    /*
+
+
+    This is where the math stuff goes!
+
+
+     */
+
+    public float Calculate (ArrayList<String> str) {
+
+
+
+        return 0.0f;
+    }
+
+    //returns true if of higher precedence, returns false if of equal or lower precedence
+    public boolean comparePrecedence(String first, String second) {
+        int pfirst = getPrecedence(first);
+        int psecond = getPrecedence(second);
+
+        if (pfirst > psecond) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    //gets the precedence level of an operator
+    private int getPrecedence (String str) {
+        for (int i = 0; i < operators.size(); i++) {
+            if (operators.get(i).contains(str)) {
+                return operators.size() - i;
+            }
+        }
+        return -1;
+    }
+
+
+
+
 
 
 
@@ -405,6 +476,15 @@ public class Interpreter {
         return str.matches("-?\\d+(\\.\\d+)?");
     }
 
+    private boolean isOperator(String str) {
+        for (int i = 0; i < operators.size(); i++) {
+            if (operators.get(i).contains(str)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //checks if there are more than 1 possible symbols left
     private boolean isAmbiguous(String str) {
         int match_count = 0;
@@ -461,46 +541,67 @@ public class Interpreter {
     private int findNextExpression(ArrayList<String> tokens, int start_index) {
         //search inside set of parenthesis
         if (tokens.get(start_index).equals("(")) {
-            int levels = 1;
-            int i = start_index + 1;
-            while (levels != 0 && i < tokens.size()) {
-                if (tokens.get(i).equals(")")) {
-                    levels--;
-                }
-                else if (tokens.get(i).equals("(")) {
-                    levels++;
-                }
-                i++;
-            }
-            if (levels != 0) {
-                return -1; //ERROR!!!!!!
-            }
-            return i - 1;
-
+            return findParenthesisExpression(tokens, start_index);
         }
         else if (tokens.get(start_index).equals("{")) {
-            int levels = 1;
-            int i = start_index + 1;
-            while (levels != 0 && i < tokens.size()) {
-                if (tokens.get(i).equals("}")) {
-                    levels--;
-                }
-                else if (tokens.get(i).equals("{")) {
-                    levels++;
-                }
-                i++;
-            }
-            if (levels != 0) {
-                return -1; //ERROR!!!!!!
-            }
-            return i - 1;
+            return findBracesExpression(tokens, start_index);
         }
         //search for end of if statement
         else if (tokens.get(start_index).equals("if")) {
 
         }
+        else if (isOperator(tokens.get(start_index))) {
+            return findOperatorExpression(tokens, start_index);
+        }
         return -1; //ERROR!!!!
 
+    }
+
+    //find expression between parenthesis
+    private int findParenthesisExpression(ArrayList<String> tokens, int start_index) {
+        int levels = 1;
+        int i = start_index + 1;
+        while (levels != 0 && i < tokens.size()) {
+            if (tokens.get(i).equals(")")) {
+                levels--;
+            }
+            else if (tokens.get(i).equals("(")) {
+                levels++;
+            }
+            i++;
+        }
+        if (levels != 0) {
+            return -1; //ERROR!!!!!!
+        }
+        return i - 1;
+    }
+
+    //find expression between braces
+    private int findBracesExpression(ArrayList<String> tokens, int start_index) {
+        int levels = 1;
+        int i = start_index + 1;
+        while (levels != 0 && i < tokens.size()) {
+            if (tokens.get(i).equals("}")) {
+                levels--;
+            }
+            else if (tokens.get(i).equals("{")) {
+                levels++;
+            }
+            i++;
+        }
+        if (levels != 0) {
+            return -1; //ERROR!!!!!!
+        }
+        return i - 1;
+    }
+
+    //find expression containing operators
+    private int findOperatorExpression(ArrayList<String> tokens, int start_index) {
+        int i = start_index + 1;
+        while (true) {
+            if (tokens.get(i))
+            i++;
+        }
     }
 
     //makes expression from string list that is inclusive to begin and end
