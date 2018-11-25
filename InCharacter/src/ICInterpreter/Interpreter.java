@@ -12,6 +12,8 @@ public class Interpreter {
     private ArrayList<String> reserved_symbols;
     private ArrayList<String> reserved_words;
     private ArrayList<ArrayList<String>> operators;
+    private Deque<String> operatorStack;
+    private Deque<String> operandStack;
     private static Interpreter instance = null;
 
 
@@ -35,6 +37,8 @@ public class Interpreter {
         reserved_words = new ArrayList<String>();
         operators = new ArrayList<ArrayList<String>>();
         operators.add(new ArrayList<String>());
+        operandStack = new ArrayDeque<String>();
+        operatorStack = new ArrayDeque<String>();
     }
 
     public void init(String filepath) {
@@ -113,52 +117,46 @@ public class Interpreter {
     //resolves an entire expression and returns resolved value
     private String resolve(Attribute attr, String expr) {
         ArrayList<String> tokens = getStringParts(expr);
-        /*for (int i = 0; i < tokens.size(); i++) {
+        for (int i = 0; i < tokens.size(); i++) {
             System.out.println(tokens.get(i));
-        }*/
+        }
 
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
             if (isReserved(tokens.get(i))) {
-                /*if (tokens.get(i).equals(":")) {
-                    resolve_Range(attr, tokens, i);
-                }
-                else */if (tokens.get(i).equals("if")) {
-                    resolve_if(attr, tokens, i);
-                }
-                else if (tokens.get(i).equals("(")) {
-                    resolve_par(attr, tokens, i);
-                }
-                else if(tokens.get(i).equals("{")) {
-                    resolve_block(attr, tokens, i);
-                }
-                else if (isOperator(tokens.get(i))) {
-                    //do math stuff
-                }
-                else if (tokens.get(i).equals("true")) {
-
-                }
-                else if (tokens.get(i).equals("false")) {
-
-                }
-                else {System.out.println("Reserved token not implemented yet!");}
+                resolve_Reserved(attr, tokens, i);
             }
             //if it's a varirable
             else if (!isNumeric((tokens.get(i))) && !isDescription(tokens.get(i))) {
                 /*if (tokens.get(i).equals("")) {
                     System.out.println("trying to interpret empty space!");
                 }*/
+                operatorStack.push("(");
                 tokens.set(i, interpret_var(attr, tokens.get(i)));
+                operandStack.push(tokens.get(i));
+                operatorStack.pop();
             }
+            else {
+                //add to the operand stack
+                operandStack.push(tokens.get(i));
+            }
+
             //moves to next token if it's a value or description
 
 
         }
 
+        //interpret rest of statement in stack
+        while (!operatorStack.isEmpty() && !operatorStack.getFirst().equals("(")) {
+            operandStack.push(calculate(operatorStack.pop()));
+        }
+
+        return operandStack.pop();
+
         //begin interpretting whole line
 
 
-        //placeholder for actual resolve of item
+        /*//placeholder for actual resolve of item
         String retStr = new String();
         for (int j = 0; j < tokens.size(); j++) {
             retStr+=tokens.get(j);
@@ -166,7 +164,7 @@ public class Interpreter {
 
         //resolve parts as a whole
 
-        return retStr;
+        return retStr;*/
     }
 
 
@@ -231,23 +229,7 @@ public class Interpreter {
 
     }
 
-    //interpret range (ex. 4:6 can return 4,5, or 6)
-    private String do_range(String first, String second) {
-        if (!isInteger(first) && !isInteger(second)) {
-            System.out.println("Got null in do_range");
-            return "null";
-        }
-        Random rand = new Random();
-        int first_val = Integer.parseInt(first);
-        int second_val = Integer.parseInt(second);
 
-        if (first_val <= second_val) {
-            return Integer.toString(rand.nextInt(second_val - first_val) + first_val) ;
-        }
-        else {
-            return Integer.toString(rand.nextInt(first_val - second_val) + second_val) ;
-        }
-    }
 
     //resolves an if statement
     private void resolve_if(Attribute attr, ArrayList<String> tokens, int ifIndex) {
@@ -262,11 +244,14 @@ public class Interpreter {
                 String blockExpr = makeExpression(tokens, ifIndex + 2, findNextExpression(tokens, ifIndex + 2));
                 tokens.subList(ifIndex, findNextExpression(tokens, ifIndex + 2) + 1).clear();
                 tokens.add(ifIndex, resolve(attr, blockExpr));
+                operandStack.push(tokens.get(ifIndex));
+
             }
             //if resolves as false
             else {
                 //remove executable block and rest of if statement from tokens
                 tokens.subList(ifIndex, findNextExpression(tokens, ifIndex+2) + 1).clear();
+                operandStack.add(" ");
             }
 
         }
@@ -286,9 +271,18 @@ public class Interpreter {
         String insideExpr = makeExpression(tokens, parIndex + 1, findNextExpression(tokens, parIndex) - 1);
         //clear out expression from tokens and replaces with resolved values
         tokens.subList(parIndex, findNextExpression(tokens, parIndex) + 1).clear();
+        //add parenthesis to stack
+        operatorStack.push("(");
         tokens.add(parIndex, resolve(attr, insideExpr));
+        operandStack.push(tokens.get(parIndex));
+        //pop off parenthesis
+        operatorStack.pop();
+
 
         //check if newly completed parenthesis expression is part of a math expression
+        if (parIndex-1 >= 0 && (isNumeric(tokens.get(parIndex-1)) || tokens.get(parIndex-1).equals(")"))) {
+            operatorStack.push("*");
+        }
         if (parIndex+1 < tokens.size() && (tokens.get(parIndex+1).equals("(") || isNumeric(tokens.get(parIndex+1)))) {
             //add the multiplication symbol
             tokens.add(parIndex+1, "*");
@@ -300,8 +294,38 @@ public class Interpreter {
         String insideExpr = makeExpression(tokens, blockIndex + 1, findNextExpression(tokens, blockIndex) - 1);
         //clear out expression from tokens and replaces with resolved values
         tokens.subList(blockIndex, findNextExpression(tokens, blockIndex) + 1).clear();
+        operatorStack.push("(");
         tokens.add(blockIndex, resolve(attr, insideExpr));
+        operandStack.push(tokens.get(blockIndex));
+        //pop off parenthesis
+        operatorStack.pop();
     }
+
+    //resolves a reserved function and calls other resolve methods
+    private void resolve_Reserved(Attribute attr, ArrayList<String> tokens, int reservedIndex) {
+
+        if (tokens.get(reservedIndex).equals("if")) {
+            resolve_if(attr, tokens, reservedIndex);
+        }
+        else if (tokens.get(reservedIndex).equals("(")) {
+            resolve_par(attr, tokens, reservedIndex);
+        }
+        else if(tokens.get(reservedIndex).equals("{")) {
+            resolve_block(attr, tokens, reservedIndex);
+        }
+        else if (isOperator(tokens.get(reservedIndex))) {
+            //do math stuff
+            resolve_Operator(attr, tokens, reservedIndex);
+        }
+        else if (tokens.get(reservedIndex).equals("true")) {
+            operandStack.push(tokens.get(reservedIndex));
+        }
+        else if (tokens.get(reservedIndex).equals("false")) {
+            operandStack.push(tokens.get(reservedIndex));
+        }
+        else {System.out.println("Reserved token not implemented yet!");}
+    }
+
 
 
 
@@ -313,19 +337,135 @@ public class Interpreter {
 
      */
 
-    public float Calculate (ArrayList<String> str) {
+    public void resolve_Operator (Attribute attr, ArrayList<String> tokens, int opIndex) {
+        //check if top of stack needs to be solved first
+        if (!operatorStack.isEmpty()) {
+            while (comparePrecedence(operatorStack.getFirst(), tokens.get(opIndex)) && !(tokens.get(opIndex).equals("("))) {
+                //start calculation for operator
+                operandStack.push(calculate(operatorStack.pop()));
+                //push result onto operand stack
+            }
+        }
+        //System.out.println("Made it to resolve operator");
+        operatorStack.push(tokens.get(opIndex));
 
 
-
-        return 0.0f;
     }
 
-    //returns true if of higher precedence, returns false if of equal or lower precedence
+    //add
+    private String doAddition(String left, String right) {
+        Float fleft = 0f;
+        Float fright = 0f;
+        if (isNumeric(left) && isNumeric(right)) {
+            fleft = Float.valueOf(left);
+            fright = Float.valueOf(left);
+        }
+
+        Float total = fleft + fright;
+        return total.toString();
+
+    }
+    //subtract
+    private String doSubtraction(String left, String right) {
+        Float fleft = 0f;
+        Float fright = 0f;
+        if (isNumeric(left) && isNumeric(right)) {
+            fleft = Float.valueOf(left);
+            fright = Float.valueOf(left);
+        }
+
+        Float total = fleft - fright;
+        return total.toString();
+
+    }
+    //multiply
+    private String doAMultiplication(String left, String right) {
+        Float fleft = 0f;
+        Float fright = 0f;
+        if (isNumeric(left) && isNumeric(right)) {
+            fleft = Float.valueOf(left);
+            fright = Float.valueOf(left);
+        }
+
+        Float total = fleft * fright;
+        return total.toString();
+
+    }
+    //divide
+    private String doDivision(String left, String right) {
+        Float fleft = 0f;
+        Float fright = 0f;
+        if (isNumeric(left) && isNumeric(right)) {
+            fleft = Float.valueOf(left);
+            fright = Float.valueOf(left);
+        }
+
+        if (fright == 0) {
+            return "null";
+        }
+        Float total = fleft / fright;
+        return total.toString();
+
+    }
+
+    //interpret range (ex. 4:6 can return 4,5, or 6)
+    private String do_range(String first, String second) {
+        if (!isInteger(first) && !isInteger(second)) {
+            System.out.println("Got null in do_range");
+            return "null";
+        }
+        Random rand = new Random();
+        int first_val = Integer.parseInt(first);
+        int second_val = Integer.parseInt(second);
+
+        if (first_val <= second_val) {
+            return Integer.toString(rand.nextInt(second_val - first_val) + first_val) ;
+        }
+        else {
+            return Integer.toString(rand.nextInt(first_val - second_val) + second_val) ;
+        }
+    }
+
+    //runs calculation for an operator
+    private String calculate(String operator) {
+        if (operator.equals("+")) {
+            String right = operandStack.pop();
+            String left = operandStack.pop();
+            return doAddition(left, right);
+        }
+        else if (operator.equals("-")) {
+            String right = operandStack.pop();
+            String left = operandStack.pop();
+            return doSubtraction(left, right);
+        }
+        else if (operator.equals("*")) {
+            String right = operandStack.pop();
+            String left = operandStack.pop();
+            return doAMultiplication(left, right);
+        }
+        else if (operator.equals("/")) {
+            String right = operandStack.pop();
+            String left = operandStack.pop();
+            return doDivision(left, right);
+        }
+        else if (operator.equals(":")) {
+            String right = operandStack.pop();
+            String left = operandStack.pop();
+            return do_range(left, right);
+        }
+        else {
+            System.out.println("Operator not implemented yet");
+            return "Operator not implemented yet";
+        }
+
+    }
+
+    //returns true if first is of higher or equal precedence, returns false if first is of lower precedence
     public boolean comparePrecedence(String first, String second) {
         int pfirst = getPrecedence(first);
         int psecond = getPrecedence(second);
 
-        if (pfirst > psecond) {
+        if (pfirst >= psecond) {
             return true;
         }
         else {
@@ -343,7 +483,13 @@ public class Interpreter {
         return -1;
     }
 
+    private void addOperator(String str) {
+        operatorStack.push(str);
+    }
 
+    private void addOperand(String str) {
+        operandStack.push(str);
+    }
 
 
 
@@ -550,14 +696,14 @@ public class Interpreter {
         else if (tokens.get(start_index).equals("if")) {
 
         }
-        else if (isOperator(tokens.get(start_index))) {
-            return findOperatorExpression(tokens, start_index);
-        }
+        /*else if (isOperator(tokens.get(start_index))) {
+            //return findOperatorExpression(tokens, start_index);
+        }*/
         return -1; //ERROR!!!!
 
     }
 
-    //find expression between parenthesis
+    //find expression between parenthesis (includes parenthesis)
     private int findParenthesisExpression(ArrayList<String> tokens, int start_index) {
         int levels = 1;
         int i = start_index + 1;
@@ -576,7 +722,7 @@ public class Interpreter {
         return i - 1;
     }
 
-    //find expression between braces
+    //find expression between braces (includes braces)
     private int findBracesExpression(ArrayList<String> tokens, int start_index) {
         int levels = 1;
         int i = start_index + 1;
@@ -596,13 +742,13 @@ public class Interpreter {
     }
 
     //find expression containing operators
-    private int findOperatorExpression(ArrayList<String> tokens, int start_index) {
+/*    private int findOperatorExpression(ArrayList<String> tokens, int start_index) {
         int i = start_index + 1;
         while (true) {
             if (tokens.get(i))
             i++;
         }
-    }
+    }*/
 
     //makes expression from string list that is inclusive to begin and end
     private String makeExpression(ArrayList<String> tokens, int begin, int end) {
