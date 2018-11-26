@@ -127,6 +127,9 @@ public class ICParser {
 
             return icfile.getValues().get(name);
         }
+        else if (icfile.getParentAttr() != null) {
+            return findVal(icfile.getParentAttr(), name);
+        }
         else {
             return null;
         }
@@ -137,6 +140,9 @@ public class ICParser {
         if(icfile.getExpressions().get(name) != null) {
             return icfile.getExpressions().get(name);
         }
+        else if (icfile.getParentAttr() != null) {
+            return findExpression(icfile.getParentAttr(), name);
+        }
         else {
             return null;
         }
@@ -146,6 +152,9 @@ public class ICParser {
         //find description in current attribute
         if(icfile.getDescriptions().get(name) != null) {
             return icfile.getDescriptions().get(name);
+        }
+        else if (icfile.getParentAttr() != null) {
+            return findDescription(icfile.getParentAttr(), name);
         }
         else {
             return null;

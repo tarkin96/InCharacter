@@ -13,9 +13,9 @@ Alignment = "";
 Experience_Points = 0;
 
 Attributes =
-	Stength = 1:5;
+	Strength = 1:5;
 	Dexterity = 1:7; 
-	Constitution = 20:40;
+	Constitution = Strength + (2 * 3) - 4 / 2 (3);
 	Intelligence = 0:50;
 	Wisdom = 0;
 	Charisma = 12;
@@ -29,7 +29,7 @@ test_if2 = if (Test_true) {3};
 
 Saving_Throws = 
 	Strength = 
-		Value = 0;
+		Value = Attributes.Strength + 12;
 		Focus = "";
 	;
 	Dexterity =

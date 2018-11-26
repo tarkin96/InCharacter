@@ -117,9 +117,9 @@ public class Interpreter {
     //resolves an entire expression and returns resolved value
     private String resolve(Attribute attr, String expr) {
         ArrayList<String> tokens = getStringParts(expr);
-        for (int i = 0; i < tokens.size(); i++) {
+        /*for (int i = 0; i < tokens.size(); i++) {
             System.out.println(tokens.get(i));
-        }
+        }*/
 
         for (int i = 0; i < tokens.size(); i++) {
             //if it's a method, do something for that method
@@ -339,12 +339,10 @@ public class Interpreter {
 
     public void resolve_Operator (Attribute attr, ArrayList<String> tokens, int opIndex) {
         //check if top of stack needs to be solved first
-        if (!operatorStack.isEmpty()) {
-            while (comparePrecedence(operatorStack.getFirst(), tokens.get(opIndex)) && !(tokens.get(opIndex).equals("("))) {
+        while (!operatorStack.isEmpty() && comparePrecedence(operatorStack.getFirst(), tokens.get(opIndex)) && !(tokens.get(opIndex).equals("("))) {
                 //start calculation for operator
                 operandStack.push(calculate(operatorStack.pop()));
                 //push result onto operand stack
-            }
         }
         //System.out.println("Made it to resolve operator");
         operatorStack.push(tokens.get(opIndex));
@@ -358,7 +356,7 @@ public class Interpreter {
         Float fright = 0f;
         if (isNumeric(left) && isNumeric(right)) {
             fleft = Float.valueOf(left);
-            fright = Float.valueOf(left);
+            fright = Float.valueOf(right);
         }
 
         Float total = fleft + fright;
@@ -371,7 +369,7 @@ public class Interpreter {
         Float fright = 0f;
         if (isNumeric(left) && isNumeric(right)) {
             fleft = Float.valueOf(left);
-            fright = Float.valueOf(left);
+            fright = Float.valueOf(right);
         }
 
         Float total = fleft - fright;
@@ -384,7 +382,7 @@ public class Interpreter {
         Float fright = 0f;
         if (isNumeric(left) && isNumeric(right)) {
             fleft = Float.valueOf(left);
-            fright = Float.valueOf(left);
+            fright = Float.valueOf(right);
         }
 
         Float total = fleft * fright;
@@ -397,7 +395,7 @@ public class Interpreter {
         Float fright = 0f;
         if (isNumeric(left) && isNumeric(right)) {
             fleft = Float.valueOf(left);
-            fright = Float.valueOf(left);
+            fright = Float.valueOf(right);
         }
 
         if (fright == 0) {
@@ -431,26 +429,31 @@ public class Interpreter {
         if (operator.equals("+")) {
             String right = operandStack.pop();
             String left = operandStack.pop();
+            //System.out.println(left + operator + right);
             return doAddition(left, right);
         }
         else if (operator.equals("-")) {
             String right = operandStack.pop();
             String left = operandStack.pop();
+            //System.out.println(left + operator + right);
             return doSubtraction(left, right);
         }
         else if (operator.equals("*")) {
             String right = operandStack.pop();
             String left = operandStack.pop();
+            //System.out.println(left + operator + right);
             return doAMultiplication(left, right);
         }
         else if (operator.equals("/")) {
             String right = operandStack.pop();
             String left = operandStack.pop();
+            //System.out.println(left + operator + right);
             return doDivision(left, right);
         }
         else if (operator.equals(":")) {
             String right = operandStack.pop();
             String left = operandStack.pop();
+            //System.out.println(left + operator + right);
             return do_range(left, right);
         }
         else {
@@ -768,14 +771,16 @@ public class Interpreter {
         if (isNumeric(retStr)) {
             attr.addValue(key, Float.parseFloat(retStr));
             attr.removeExpression(key);
+            //System.out.println("Replacing value of key: " + key);
+            //System.out.println("With the value: " + retStr);
         }
         else if (isDescription(retStr)) {
             attr.addDescription(key, retStr);
             attr.removeExpression(key);
         }
         else {
-            System.out.println("Replacing expression of key: " + key);
-            System.out.println("With the expression: " + retStr);
+            //System.out.println("Replacing expression of key: " + key);
+            //System.out.println("With the expression: " + retStr);
             attr.addExpression(key, retStr);
         }
         //remove function from function map
